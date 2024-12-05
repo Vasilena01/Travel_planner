@@ -1,0 +1,51 @@
+/* General styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+/* Header styles */
+h1 {
+    text-align: center;
+    margin-top: 50px;
+    font-size: 2.5em;
+    color: #007BFF;
+}
+
+/* Paragraph styles */
+p {
+    text-align: center;
+    font-size: 1.2em;
+    color: #555;
+}
+
+/* Link buttons */
+a {
+    display: inline-block;
+    text-decoration: none;
+    font-size: 1.2em;
+    color: white;
+    background-color: #007BFF;
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin: 10px;
+    text-align: center;
+}
+
+a:hover {
+    background-color: #0056b3;
+    transition: background-color 0.3s;
+}
+
+/* Centering content */
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
