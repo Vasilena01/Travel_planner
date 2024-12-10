@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'main',
     'authentication',
+    'hotel_finder'
 ]
 
 MIDDLEWARE = [
