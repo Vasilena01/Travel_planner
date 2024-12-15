@@ -1,61 +1,60 @@
+from datetime import datetime
 from django.shortcuts import render
 import http.client
 import json
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 
+def search_hotels(request):
+    hotels = None
+    error_message = None
+    current_date = datetime.now().strftime('%Y-%m-%d')
 
-def search_destination_page(request):
-    return render(request, 'hotel_finder/search_destination.html')
-
-
-@csrf_exempt
-def search_destination(request):
     if request.method == 'POST':
         destination = request.POST.get('destination')
-        conn = http.client.HTTPSConnection("booking-com15.p.rapidapi.com")
-        headers = {
-            'x-rapidapi-key': "25aa21455dmsh86b46541b28213bp1489a5jsn374b2d97cd64",
-            'x-rapidapi-host': "booking-com15.p.rapidapi.com"
-        }
-        conn.request(
-            "GET", f"/api/v1/hotels/searchDestination?query={destination}", headers=headers)
-        res = conn.getresponse()
-        data = json.loads(res.read().decode("utf-8"))
-        return JsonResponse({'destinations': data['data']})
-
-
-@csrf_exempt
-def search_hotels(request):
-    if request.method == 'POST':
-        dest_id = request.POST.get('dest_id')
-        search_type = request.POST.get('search_type', 'city')
         arrival_date = request.POST.get('arrival_date')
         departure_date = request.POST.get('departure_date')
         adults = request.POST.get('adults', 1)
-        children_age = request.POST.get('children_age', '')
-        room_qty = request.POST.get('room_qty', 1)
+        children = request.POST.get('children_age', '') 
+        rooms = request.POST.get('room_qty', 1)
         page_number = request.POST.get('page_number', 1)
 
+        if arrival_date == departure_date:
+            error_message = "Check-in and Check-out dates cannot be the same."
+            return render(request, 'hotel_finder/search_destination.html', {'error_message': error_message, 'current_date': current_date})
+
+        if arrival_date < current_date or departure_date < current_date:
+            error_message = "Dates cannot be in the past."
+            return render(request, 'hotel_finder/search_destination.html', {'error_message': error_message, 'current_date': current_date})
+
+        # Fetch destination ID
         conn = http.client.HTTPSConnection("booking-com15.p.rapidapi.com")
         headers = {
             'x-rapidapi-key': "25aa21455dmsh86b46541b28213bp1489a5jsn374b2d97cd64",
             'x-rapidapi-host': "booking-com15.p.rapidapi.com"
         }
-        url = (
-            f"/api/v1/hotels/searchHotels?dest_id={dest_id}&search_type={search_type}"
-            f"&arrival_date={arrival_date}&departure_date={departure_date}&adults={adults}"
-            f"&children_age={children_age}&room_qty={room_qty}&page_number={page_number}"
-        )
+        conn.request("GET", f"/api/v1/hotels/searchDestination?query={destination}", headers=headers)
+        res = conn.getresponse()
+        dest_data = json.loads(res.read().decode("utf-8"))
+        
+        if not dest_data['data']:
+            error_message = "Destination not found. Please try another location."
+        else:
+            dest_id = dest_data['data'][0]['dest_id']
 
-        try:
+            # Fetch hotels for the destination
+            url = (
+                f"/api/v1/hotels/searchHotels?dest_id={dest_id}&search_type=city"
+                f"&arrival_date={arrival_date}&departure_date={departure_date}"
+            )
             conn.request("GET", url, headers=headers)
             res = conn.getresponse()
-            data = json.loads(res.read().decode("utf-8"))
+            hotels_data = json.loads(res.read().decode("utf-8"))
+            hotels = hotels_data['data']['hotels'] if 'hotels' in hotels_data['data'] else None
 
-            if 'hotels' in data['data']:
-                return JsonResponse({'hotels': data['data']['hotels']})
-            else:
-                return JsonResponse({'error': 'No hotels found'}, status=404)
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
+            if not hotels:
+                error_message = "No hotels found for the given search. Please try again."
+
+    return render(
+        request, 
+        'hotel_finder/search_destination.html', 
+        {'hotels': hotels, 'error_message': error_message, 'current_date': current_date}
+    )

@@ -6,4 +6,5 @@ from hotel_finder import views as hotel_finder_views
 urlpatterns = [
     path('', views.homepage, name='homepage'),
     path('auth/logout/', auth_views.logout_user, name='logout'),
+    path('hotels/search-destination/', hotel_finder_views.search_hotels, name='search_destination'),
 ]

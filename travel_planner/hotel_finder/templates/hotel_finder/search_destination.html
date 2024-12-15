@@ -1,153 +1,64 @@
 {% load static %}
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Search Destination</title>
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="{% static 'hotel_finder/styles.css' %}"
-    />
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  </head>
-  <body>
+<head>
+    <title>Search Hotels</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'hotel_finder/styles.css' %}">
+</head>
+<body>
     <h1>Search Hotels</h1>
 
-    <!-- Search Bar for Destination -->
-    <form id="destination-form">
-      {% csrf_token %}
-      <input
-        type="text"
-        id="destination"
-        name="destination"
-        placeholder="Enter destination"
-        required
-      />
-      <button type="submit">Search</button>
+    {% if messages %}
+    <ul>
+        {% for message in error_message %}
+        <li style="color: red;">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <form method="post" action="{% url 'search_destination' %}">
+        {% csrf_token %}
+
+        <label for="destination">Destination:</label>
+        <input type="text" id="destination" name="destination" placeholder="Enter destination" required>
+
+        <label for="checkin">Check-In Date:</label>
+        <input type="date" id="checkin" name="arrival_date" min="{{ current_date }}" required>
+
+        <label for="checkout">Check-Out Date:</label>
+        <input type="date" id="checkout" name="departure_date" min="{{ current_date }}" required>
+
+        <label for="adults">Adults:</label>
+        <input type="number" id="adults" name="adults" min="1" value="1" required>
+
+        <label for="children">Children Ages (comma-separated):</label>
+        <input type="text" id="children-age" name="children_age" placeholder="e.g., 0,5,10">
+
+        <label for="rooms">Rooms:</label>
+        <input type="number" id="rooms" name="room_qty" min="1" value="1" required>
+
+        <label for="page">Page Number:</label>
+        <input type="number" id="page-number" name="page_number" min="1" value="1">
+
+        <button type="submit">Find Hotels</button>
     </form>
 
-    <!-- Trip Details -->
-    <div id="trip-details" style="display: none">
-      <h3>Enter Trip Details</h3>
-      <form id="trip-details-form">
-        {% csrf_token %}
-        <input type="hidden" id="dest_id" name="dest_id" />
-        <input type="hidden" name="search_type" value="city" />
-        <!-- Default value -->
-        <label for="checkin">Check-In Date:</label>
-        <input type="date" id="checkin" name="arrival_date" required />
-        <label for="checkout">Check-Out Date:</label>
-        <input type="date" id="checkout" name="departure_date" required />
-        <label for="adults">Adults:</label>
-        <input
-          type="number"
-          id="adults"
-          name="adults"
-          min="1"
-          value="1"
-          required
-        />
-        <label for="children">Children Ages (comma-separated):</label>
-        <input
-          type="text"
-          id="children-age"
-          name="children_age"
-          placeholder="e.g., 0,5,10"
-        />
-        <label for="rooms">Rooms:</label>
-        <input
-          type="number"
-          id="rooms"
-          name="room_qty"
-          min="1"
-          value="1"
-          required
-        />
-        <label for="page">Page Number:</label>
-        <input
-          type="number"
-          id="page-number"
-          name="page_number"
-          min="1"
-          value="1"
-        />
-        <button type="submit">Find Hotels</button>
-      </form>
+    {% if hotels %}
+    <div id="hotel-results">
+        <h2>Hotels</h2>
+        <div id="hotels-container">
+            {% for hotel in hotels %}
+            <div class="hotel-card">
+                <img src="{{ hotel.property.photoUrls.0 }}" alt="{{ hotel.property.name }}" width="200">
+                <h3>{{ hotel.property.name }}</h3>
+                <p>Price: {{ hotel.property.priceBreakdown.grossPrice.value|floatformat:0 }} {{ hotel.property.priceBreakdown.grossPrice.currency }}</p>
+                <p>Review score: {{ hotel.property.reviewScore }} / 10</p>
+            </div>
+            {% endfor %}
+        </div>
     </div>
-
-    <!-- Hotel Results -->
-    <div id="hotel-results" style="display: none">
-      <h2>Hotels</h2>
-      <div id="hotels-container"></div>
-    </div>
-
-    <script>
-      $("#destination-form").on("submit", function (event) {
-        event.preventDefault();
-        $("#trip-details-form")[0].reset();
-        $("#trip-details").hide();
-        $("#hotel-results").hide();
-        $("#hotels-container").empty();
-        const destination = $("#destination").val();
-
-        $.ajax({
-          url: "{% url 'search_destination' %}",
-          method: "POST",
-          data: {
-            destination: destination,
-            csrfmiddlewaretoken: "{{ csrf_token }}",
-          },
-          success: function (response) {
-            if (response.destinations && response.destinations.length > 0) {
-              const destId = response.destinations[0].dest_id;
-              console.log(destId);
-              $("#dest_id").val(destId);
-              $("#trip-details").show();
-            } else {
-              alert("No destinations found. Please try again.");
-            }
-          },
-          error: function (xhr, status, error) {
-            console.error("Error: ", error);
-            alert("Unable to find destination. Please try again.");
-          },
-        });
-      });
-
-      $("#trip-details-form").on("submit", function (event) {
-        event.preventDefault();
-        const formData = $(this).serialize();
-        $.ajax({
-          url: "{% url 'search_hotels' %}",
-          method: "POST",
-          data: formData,
-          success: function (response) {
-            if (response.hotels && response.hotels.length > 0) {
-              const hotels = response.hotels;
-              let htmlContent = "";
-              hotels.forEach((hotel) => {
-                htmlContent += `
-                                <div class="hotel-card">
-                                    <img src="${hotel.property.photoUrls[0]}" alt="${hotel.property.name}" width="200">
-                                    <h3>${hotel.property.name}</h3>
-                                    <p>Price: ${Math.round(hotel.property.priceBreakdown.grossPrice.value)} ${hotel.property.priceBreakdown.grossPrice.currency}</p>
-                                    <p>Review score: ${hotel.property.reviewScore} / 10</p>
-                                </div>`;
-              });
-              $("#hotels-container").html(htmlContent);
-              $("#hotel-results").show();
-            } else {
-              alert(
-                "No hotels found for the specified details. Please try again."
-              );
-            }
-          },
-          error: function (xhr, status, error) {
-            console.error("Error: ", error);
-            alert("Unable to fetch hotels. Please try again.");
-          },
-        });
-      });
-    </script>
-  </body>
+    {% else %}
+    <p>No hotels found. Please try again with different details.</p>
+    {% endif %}
+</body>
 </html>
