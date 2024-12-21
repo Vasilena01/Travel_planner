@@ -1,64 +1,92 @@
-{% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Search Hotels</title>
-    <link rel="stylesheet" type="text/css" href="{% static 'hotel_finder/styles.css' %}">
-</head>
-<body>
-    <h1>Search Hotels</h1>
+{% extends "base.html" %} {% load static %} {% block content %}
+<title>Search Hotels</title>
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{% static 'hotel_finder/styles.css' %}"
+/>
 
-    {% if messages %}
-    <ul>
-        {% for message in error_message %}
-        <li style="color: red;">{{ message }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
+<h1>Search Hotels</h1>
 
-    <form method="post" action="{% url 'search_destination' %}">
-        {% csrf_token %}
+{% if messages %}
+<ul>
+  {% for message in error_message %}
+  <li style="color: red">{{ message }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
 
-        <label for="destination">Destination:</label>
-        <input type="text" id="destination" name="destination" placeholder="Enter destination" required>
+<form method="post" action="{% url 'search_hotels' %}">
+  {% csrf_token %}
 
-        <label for="checkin">Check-In Date:</label>
-        <input type="date" id="checkin" name="arrival_date" min="{{ current_date }}" required>
+  <label for="destination">Destination:</label>
+  <input
+    type="text"
+    id="destination"
+    name="destination"
+    placeholder="Enter destination"
+    required
+  />
 
-        <label for="checkout">Check-Out Date:</label>
-        <input type="date" id="checkout" name="departure_date" min="{{ current_date }}" required>
+  <label for="checkin">Check-In Date:</label>
+  <input
+    type="date"
+    id="checkin"
+    name="arrival_date"
+    min="{{ current_date }}"
+    required
+  />
 
-        <label for="adults">Adults:</label>
-        <input type="number" id="adults" name="adults" min="1" value="1" required>
+  <label for="checkout">Check-Out Date:</label>
+  <input
+    type="date"
+    id="checkout"
+    name="departure_date"
+    min="{{ current_date }}"
+    required
+  />
 
-        <label for="children">Children Ages (comma-separated):</label>
-        <input type="text" id="children-age" name="children_age" placeholder="e.g., 0,5,10">
+  <label for="adults">Adults:</label>
+  <input type="number" id="adults" name="adults" min="1" value="1" required />
 
-        <label for="rooms">Rooms:</label>
-        <input type="number" id="rooms" name="room_qty" min="1" value="1" required>
+  <label for="children">Children Ages (comma-separated):</label>
+  <input
+    type="text"
+    id="children-age"
+    name="children_age"
+    placeholder="e.g., 0,5,10"
+  />
 
-        <label for="page">Page Number:</label>
-        <input type="number" id="page-number" name="page_number" min="1" value="1">
+  <label for="rooms">Rooms:</label>
+  <input type="number" id="rooms" name="room_qty" min="1" value="1" required />
 
-        <button type="submit">Find Hotels</button>
-    </form>
+  <label for="page">Page Number:</label>
+  <input type="number" id="page-number" name="page_number" min="1" value="1" />
 
-    {% if hotels %}
-    <div id="hotel-results">
-        <h2>Hotels</h2>
-        <div id="hotels-container">
-            {% for hotel in hotels %}
-            <div class="hotel-card">
-                <img src="{{ hotel.property.photoUrls.0 }}" alt="{{ hotel.property.name }}" width="200">
-                <h3>{{ hotel.property.name }}</h3>
-                <p>Price: {{ hotel.property.priceBreakdown.grossPrice.value|floatformat:0 }} {{ hotel.property.priceBreakdown.grossPrice.currency }}</p>
-                <p>Review score: {{ hotel.property.reviewScore }} / 10</p>
-            </div>
-            {% endfor %}
-        </div>
+  <button type="submit">Find Hotels</button>
+</form>
+
+{% if hotels %}
+<div id="hotel-results">
+  <h2>Hotels</h2>
+  <div id="hotels-container">
+    {% for hotel in hotels %}
+    <div class="hotel-card">
+      <img
+        src="{{ hotel.property.photoUrls.0 }}"
+        alt="{{ hotel.property.name }}"
+        width="200"
+      />
+      <h3>{{ hotel.property.name }}</h3>
+      <p>
+        Price: {{hotel.property.priceBreakdown.grossPrice.value|floatformat:0}}
+        {{hotel.property.priceBreakdown.grossPrice.currency }}
+      </p>
+      <p>Review score: {{ hotel.property.reviewScore }} / 10</p>
     </div>
-    {% else %}
-    <p>No hotels found. Please try again with different details.</p>
-    {% endif %}
-</body>
-</html>
+    {% endfor %}
+  </div>
+</div>
+{% else %}
+<p>No hotels found. Please try again with different details.</p>
+{% endif %} {% endblock %}

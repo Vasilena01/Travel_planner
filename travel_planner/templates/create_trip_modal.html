@@ -1,0 +1,88 @@
+<button
+  type="button"
+  class="btn btn-primary"
+  data-bs-toggle="modal"
+  data-bs-target="#createTripModal"
+>
+  Create trip
+</button>
+<div
+  class="modal fade"
+  id="createTripModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="createTripModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="createTripModalLabel">Create a New Trip</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form
+          id="createTripForm"
+          method="post"
+          action="{% url 'create_trip' %}"
+        >
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="destination" class="col-form-label">Destination:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="destination"
+              name="destination"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="start-date" class="col-form-label">Start Date:</label>
+            <input
+              type="date"
+              class="form-control"
+              id="start-date"
+              name="start_date"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="end-date" class="col-form-label">End Date:</label>
+            <input
+              type="date"
+              class="form-control"
+              id="end-date"
+              name="end_date"
+              required
+            />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Close
+        </button>
+        <button type="submit" form="createTripForm" class="btn btn-primary">
+          Save changes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const createTripModal = document.getElementById("createTripModal");
+  
+      // Reset form on modal close
+      createTripModal.addEventListener("hidden.bs.modal", function () {
+        const form = document.getElementById("createTripForm");
+        form.reset();
+      });
+    });
+  </script>

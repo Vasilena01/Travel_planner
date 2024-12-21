@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Trip to {{ trip.destination }}</h1>
+<p>Start Date: {{ trip.start_date }}</p>
+<p>End Date: {{ trip.end_date }}</p>
+<a href="{% url 'list_trips' %}">Back to Trips</a>
+{% endblock %}

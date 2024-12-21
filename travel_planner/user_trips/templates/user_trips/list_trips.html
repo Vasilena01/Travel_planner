@@ -1,0 +1,24 @@
+{% extends "base.html" %} {% load static %} {% block content %}
+<title>My Trips</title>
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{% static 'user_trips/list_trips.css' %}"
+/>
+
+<h1>My trips</h1>
+{% if trips %}
+<ul>
+    {% for trip in trips%}
+    <li>
+        <a href="{% url 'trip_detail' trip.id %}">
+            {{ trip.destination }} ({{ trip.start_date }} - {{ trip.end_date }})
+        </a>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No trips added!</p>
+{% endif %}
+{% include "create_trip_modal.html" %}
+{% endblock %}

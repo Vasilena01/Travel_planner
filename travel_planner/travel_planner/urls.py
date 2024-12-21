@@ -6,4 +6,5 @@ urlpatterns = [
     path('', include('main.urls')),
     path('auth/', include('authentication.urls')),
     path('hotels/', include('hotel_finder.urls')),
+    path('my-trips/', include('user_trips.urls')),
 ]

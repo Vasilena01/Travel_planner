@@ -1,8 +1,10 @@
 from datetime import datetime
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 import http.client
 import json
 
+@login_required
 def search_hotels(request):
     hotels = None
     error_message = None
