@@ -1,3 +1,4 @@
+import requests
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import MyTrip
@@ -22,6 +23,23 @@ def create_trip(request):
         if(start_date >= end_date):
             return redirect('list_trips')
         
+        api_url = "https://booking-com15.p.rapidapi.com/api/v1/hotels/searchDestination"
+        headers = {
+            "x-rapidapi-key": "25aa21455dmsh86b46541b28213bp1489a5jsn374b2d97cd64",
+            "x-rapidapi-host": "booking-com15.p.rapidapi.com",
+        }
+        params = {"query": destination}
+        response = requests.get(api_url, headers=headers, params=params)        
+
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("status") and data.get("data"):
+                image_url = data["data"][0].get("image_url", "")
+            else:
+                image_url = ""
+        else:
+            image_url = ""
+    
         MyTrip.objects.create(
             user=request.user,
             destination=destination,

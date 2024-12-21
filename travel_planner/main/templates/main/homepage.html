@@ -5,16 +5,9 @@
 <h1>Welcome to Travel Planner</h1>
 <p>Start planning your trips!</p>
 
-{% if request.user.is_authenticated %} {% if trips %}
-<ul>
-  {% for trip in trips%}
-  <li>
-    <a href="{% url 'trip_detail' trip.id %}">
-      {{ trip.destination }} ({{ trip.start_date }} - {{ trip.end_date }})
-    </a>
-  </li>
-  {% endfor %}
-</ul>
+{% if request.user.is_authenticated %} 
+{% if trips %}
+{% include "list_user_trips.html" %}
 {% endif %}
 {% include "create_trip_modal.html" %}
 {% else %}

@@ -8,15 +8,7 @@
 
 <h1>My trips</h1>
 {% if trips %}
-<ul>
-    {% for trip in trips%}
-    <li>
-        <a href="{% url 'trip_detail' trip.id %}">
-            {{ trip.destination }} ({{ trip.start_date }} - {{ trip.end_date }})
-        </a>
-    </li>
-    {% endfor %}
-</ul>
+{% include "list_user_trips.html" %}
 {% else %}
 <p>No trips added!</p>
 {% endif %}

@@ -1,0 +1,9 @@
+<ul>
+    {% for trip in trips%}
+    <li>
+      <a href="{% url 'trip_detail' trip.id %}">
+        {{ trip.destination }} ({{ trip.start_date }} - {{ trip.end_date }})
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
