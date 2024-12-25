@@ -2,7 +2,7 @@ h1 {
     text-align: center;
     margin-top: 50px;
     font-size: 2.5em;
-    color: #007BFF;
+    color: #ff69b4;
 }
 
 p {
@@ -16,7 +16,7 @@ p {
     text-decoration: none;
     font-size: 1.2em;
     color: white;
-    background-color: #007BFF;
+    background-color: #ffd700;
     padding: 10px 20px;
     border-radius: 5px;
     margin: 10px;
@@ -24,6 +24,56 @@ p {
 }
 
 .homepage-btn:hover {
-    background-color: #0056b3;
+    background-color: #d8ba0d;
     transition: background-color 0.3s;
+}
+
+.trips-container {
+    margin: 20px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#trips-container {
+    display: flex;
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.trips-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #343a40;
+    margin: 0;
+}
+
+.create-trip-btn {
+    background-color: #ffd700;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.create-trip-btn i {
+    font-size: 1.2rem;
+}
+
+.create-trip-btn:hover {
+    background-color: #d8ba0d;
+    transform: scale(1.05);
+    cursor: pointer;
 }

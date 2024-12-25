@@ -1,15 +1,26 @@
 {% extends "base.html" %} {% load static %} {% block content %}
-<title>Travel Planner</title>
+<title>WanderWise</title>
 <link rel="stylesheet" type="text/css" href="{% static 'main/styles.css' %}" />
 
-<h1>Welcome to Travel Planner</h1>
+<h1>Welcome to WanderWise</h1>
 <p>Start planning your trips!</p>
 
-{% if request.user.is_authenticated %} 
-{% if trips %}
-{% include "list_user_trips.html" %}
-{% endif %}
-{% include "create_trip_modal.html" %}
+{% if request.user.is_authenticated %}
+<div class="trips-container">
+    <div class="header-container">
+        <p class="trips-title">Upcoming Trips</p>
+        <button
+            type="button"
+            class="btn btn-primary create-trip-btn"
+            data-bs-toggle="modal"
+            data-bs-target="#createTripModal"
+        >
+            <i class="fas fa-plus"></i> Create Trip
+        </button>
+    </div>
+    {% include "list_user_trips.html" %}
+    {% include "create_trip_modal.html" %}
+</div>
 {% else %}
 <a class="homepage-btn" href="{% url 'register' %}">Register</a>
 <a class="homepage-btn" href="{% url 'login' %}">Login</a>

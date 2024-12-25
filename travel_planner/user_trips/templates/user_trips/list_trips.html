@@ -1,16 +1,27 @@
-{% extends "base.html" %} {% load static %} {% block content %}
-<title>My Trips</title>
-<link
-  rel="stylesheet"
-  type="text/css"
-  href="{% static 'user_trips/list_trips.css' %}"
-/>
+{% extends "base.html" %} 
+{% load static %}
+{% block content %}
+<link rel="stylesheet" type="text/css" href="{% static 'user_trips/list_trips.css' %}" />
 
-<h1>My trips</h1>
+<div class="trips-header">
+    <h1 class="trips-title">My Trips</h1>
+    <button
+        type="button"
+        class="btn btn-primary create-trip-btn"
+        data-bs-toggle="modal"
+        data-bs-target="#createTripModal"
+    >
+        <i class="fas fa-plus"></i> Create Trip
+    </button>
+</div>
+
 {% if trips %}
-{% include "list_user_trips.html" %}
+<div class="trips-container">
+    {% include "list_user_trips.html" %}
+</div>
 {% else %}
 <p>No trips added!</p>
 {% endif %}
+
 {% include "create_trip_modal.html" %}
 {% endblock %}

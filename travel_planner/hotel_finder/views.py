@@ -1,8 +1,7 @@
+import requests
 from datetime import datetime
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-import http.client
-import json
 
 @login_required
 def search_hotels(request):
@@ -28,32 +27,45 @@ def search_hotels(request):
             return render(request, 'hotel_finder/search_destination.html', {'error_message': error_message, 'current_date': current_date})
 
         # Fetch destination ID
-        conn = http.client.HTTPSConnection("booking-com15.p.rapidapi.com")
-        headers = {
-            'x-rapidapi-key': "25aa21455dmsh86b46541b28213bp1489a5jsn374b2d97cd64",
-            'x-rapidapi-host': "booking-com15.p.rapidapi.com"
-        }
-        conn.request("GET", f"/api/v1/hotels/searchDestination?query={destination}", headers=headers)
-        res = conn.getresponse()
-        dest_data = json.loads(res.read().decode("utf-8"))
-        
-        if not dest_data['data']:
-            error_message = "Destination not found. Please try another location."
-        else:
-            dest_id = dest_data['data'][0]['dest_id']
+        try:
+            headers = {
+                'x-rapidapi-key': "25aa21455dmsh86b46541b28213bp1489a5jsn374b2d97cd64",
+                'x-rapidapi-host': "booking-com15.p.rapidapi.com"
+            }
 
-            # Fetch hotels for the destination
-            url = (
-                f"/api/v1/hotels/searchHotels?dest_id={dest_id}&search_type=city"
-                f"&arrival_date={arrival_date}&departure_date={departure_date}"
+            dest_response = requests.get(
+                f"https://booking-com15.p.rapidapi.com/api/v1/hotels/searchDestination?query={destination}",
+                headers=headers
             )
-            conn.request("GET", url, headers=headers)
-            res = conn.getresponse()
-            hotels_data = json.loads(res.read().decode("utf-8"))
-            hotels = hotels_data['data']['hotels'] if 'hotels' in hotels_data['data'] else None
+            dest_data = dest_response.json()
+            
+            if not dest_data.get('data'):
+                error_message = "Destination not found. Please try another location."
+            else:
+                dest_id = dest_data['data'][0]['dest_id']
 
-            if not hotels:
-                error_message = "No hotels found for the given search. Please try again."
+                hotel_response = requests.get(
+                    "https://booking-com15.p.rapidapi.com/api/v1/hotels/searchHotels",
+                    headers=headers,
+                    params={
+                        'dest_id': dest_id,
+                        'search_type': 'city',
+                        'arrival_date': arrival_date,
+                        'departure_date': departure_date,
+                        'adults': adults,
+                        'children_age': children,
+                        'room_qty': rooms,
+                        'page_number': page_number
+                    }
+                )
+                hotels_data = hotel_response.json()
+                hotels = hotels_data.get('data', {}).get('hotels')
+
+                if not hotels:
+                    error_message = "No hotels found for the given search. Please try again."
+
+        except requests.exceptions.RequestException as e:
+            error_message = f"An error occurred: {e}"
 
     return render(
         request, 

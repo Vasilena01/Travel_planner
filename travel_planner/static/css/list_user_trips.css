@@ -1,0 +1,68 @@
+a {
+    text-decoration: none;
+ }
+
+.card {
+    position: relative;
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    margin: 15px;
+    width: 18rem;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+.card img {
+    height: 200px;
+    object-fit: cover;
+    border-bottom: 1px solid #ddd;
+}
+
+.card-body {
+    padding: 20px;
+    padding-bottom: 3rem;
+    text-align: center;
+}
+
+.card-title {
+    font-size: 1.5em;
+    color: #ff69b4;
+    margin-bottom: 10px;
+}
+
+.card-text {
+    font-size: 1em;
+    color: #666;
+}
+
+.delete-trip-btn {
+    position: absolute;
+    bottom: 0px;
+    right: 10px;
+    text-align: center;
+    color: #ff1a8d;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+}
+
+.delete-trip-btn:hover {
+    color: #c10261;
+}
+
+.delete-trip-btn i {
+    font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+    .card {
+        width: 100%;
+    }
+}

@@ -3,9 +3,9 @@ body {
     flex-direction: column;
     height: 100%;
     overflow: auto;
-    font-family: "Open Sans", sans-serif;
+    font-family: "Inter", sans-serif;
     font-size: 1.2rem;
-    color: #227db2;
+    color: #ff69b4;
 }
 
 html {
@@ -13,6 +13,20 @@ html {
     height: 100%;
     display: flex;
     flex-direction: column;
+}
+
+.logo {
+    height: 60px;
+    width: 60px;
+}
+
+.brand-title {
+    font-family: "Pacifico", cursive;
+    font-size: 1.2rem;
+    font-weight: bold;
+    background: linear-gradient(90deg, #ff69b4, #ffd700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;  
 }
 
 .navbar-nav  {
@@ -38,7 +52,7 @@ footer {
     padding: 20px;
     margin: 0;
     color: white;
-    background: linear-gradient(to right, #227db2, #41bde5);
+    background: linear-gradient(90deg, #ff69b4, #ffd700);
 }
 
 footer.footer-expanded {

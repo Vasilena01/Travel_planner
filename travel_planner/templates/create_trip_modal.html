@@ -1,11 +1,4 @@
-<button
-  type="button"
-  class="btn btn-primary"
-  data-bs-toggle="modal"
-  data-bs-target="#createTripModal"
->
-  Create trip
-</button>
+{% load static %}
 <div
   class="modal fade"
   id="createTripModal"
@@ -29,7 +22,7 @@
         <form
           id="createTripForm"
           method="post"
-          action="{% url 'create_trip' %}"
+          action="{% url 'create_trip' %}?next={{ request.path }}"
         >
           {% csrf_token %}
           <div class="form-group">
@@ -68,7 +61,7 @@
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
           Close
         </button>
-        <button type="submit" form="createTripForm" class="btn btn-primary">
+        <button type="submit" form="createTripForm" class="btn btn-primary save-btn">
           Save changes
         </button>
       </div>
@@ -85,4 +78,4 @@
         form.reset();
       });
     });
-  </script>
+</script>
