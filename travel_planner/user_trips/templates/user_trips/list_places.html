@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" type="text/css" href="{% static 'user_trips/list_places.css' %}" />
+<div class="container mt-4">
+    <h2>Add {{ place_type|title }} in {{ trip.destination }}</h2>
+    
+    {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+    
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for place in places %}
+        <div class="col">
+            <div class="card h-100">
+                {% if place.photos %}
+                    <img src="{{ place.photos.0 }}" class="card-img-top" alt="{{ place.name }}" 
+                         style="height: 200px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ place.name }}</h5>
+                    <p class="card-text">{{ place.description|truncatewords:30 }}</p>
+                    <p class="card-text"><small class="text-muted">{{ place.address }}</small></p>
+                    {% if place.rating != 'No rating' %}
+                        <p class="card-text"><small class="text-muted">Rating: {{ place.rating }}</small></p>
+                    {% endif %}
+                    <button class="btn btn-primary add-to-list" 
+                            data-place='{"name": "{{ place.name }}", "address": "{{ place.address }}", "photo": "{{ place.photos.0 }}", "type": "{{ place_type }}"}'>
+                        Add to Trip
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+document.querySelectorAll('.add-to-list').forEach(button => {
+    button.addEventListener('click', function() {
+        const placeData = JSON.parse(this.dataset.place);
+        
+        // Create new place element
+        const placeElement = document.createElement('div');
+        placeElement.className = 'list-item';
+        placeElement.innerHTML = `
+            ${placeData.photo ? `<img src="${placeData.photo}" alt="${placeData.name}">` : ''}
+            <div class="place-info">
+                <h4>${placeData.name}</h4>
+                <p>${placeData.address}</p>
+            </div>
+        `;
+        
+        // Add to appropriate list back on the trip detail page
+        const targetList = window.opener.document.querySelector(
+            placeData.type === 'attractions' ? '#attractions-list .list-items' : '#restaurants-list .list-items'
+        );
+        
+        if (targetList) {
+            targetList.appendChild(placeElement);
+            
+            // Update place count
+            const countElement = window.opener.document.querySelector(
+                `#${placeData.type}-list .place-count`
+            );
+            if (countElement) {
+                const currentCount = targetList.children.length;
+                countElement.textContent = `${currentCount} place${currentCount !== 1 ? 's' : ''}`;
+            }
+            
+            // Close this window
+            window.close();
+        }
+    });
+});
+</script>
+{% endblock %}

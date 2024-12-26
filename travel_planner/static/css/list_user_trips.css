@@ -2,6 +2,15 @@ a {
     text-decoration: none;
  }
 
+ #trips-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: .5rem;
+    padding: .5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
 .card {
     position: relative;
     border: none;

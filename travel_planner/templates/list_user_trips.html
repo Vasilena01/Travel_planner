@@ -4,23 +4,25 @@
 <title>User Trips</title>
 <link rel="stylesheet" type="text/css" href="{% static 'css/list_user_trips.css' %}" /><div id="trips-container">
 
+<div id="trips-container">
   {% for trip in trips%}
-<div class="card" style="width: 18rem;">
-  <a href="{% url 'trip_detail' trip.id %}">
-    <img class="card-img-top" src="{{ trip.image_url }}" alt="{{ trip.destination }}" loading="lazy">
-    <div class="card-body">
-      <h3 class="card-title">{{ trip.destination }}</h3>
-      <p class="card-text">{{ trip.start_date }} - {{ trip.end_date }}</p>
-    </div>
-  </a>
-  <form method="post" action="{% url 'delete_trip' trip.id %}?next={{ request.path }}">
-    {% csrf_token %}
-    <button type="submit" class="delete-trip-btn">
-        <i class="fas fa-trash-alt"></i>
-    </button>
-  </form>
+  <div class="card" style="width: 18rem;">
+    <a href="{% url 'trip_detail' trip.id %}">
+      <img class="card-img-top" src="{{ trip.image_url }}" alt="{{ trip.destination }}" loading="lazy">
+      <div class="card-body">
+        <h3 class="card-title">{{ trip.destination }}</h3>
+        <p class="card-text">{{ trip.start_date }} - {{ trip.end_date }}</p>
+      </div>
+    </a>
+    <form method="post" action="{% url 'delete_trip' trip.id %}?next={{ request.path }}">
+      {% csrf_token %}
+      <button type="submit" class="delete-trip-btn">
+          <i class="fas fa-trash-alt"></i>
+      </button>
+    </form>
+  </div>
+  {% endfor %}
 </div>
-{% endfor %}
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         console.log("Delete trip confirmation script loaded");

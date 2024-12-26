@@ -3,76 +3,113 @@
 {% block content %}
 <link rel="stylesheet" type="text/css" href="{% static 'user_trips/trip_detail.css' %}" />
 
-<a href="{% url 'list_trips' %}" class="back-to-trips-link">
-    <i class="fas fa-arrow-left"></i> Back to Trips
-</a>
-<div>
-    <h1>Trip to {{ trip.destination }}</h1>
-    <p>Start Date: {{ trip.start_date }}</p>
-    <p>End Date: {{ trip.end_date }}</p>
-</div>
 
-<button
-  type="button"
-  class="btn btn-primary"
-  data-bs-toggle="modal"
-  data-bs-target="#searchHotelModal"
->
-  Search for Accommodation
-</button>
-
-<div
-  class="modal fade"
-  id="searchHotelModal"
-  tabindex="-1"
-  aria-labelledby="searchHotelModalLabel"
-  aria-hidden="true"
->
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="searchHotelModalLabel">Search for Accommodation</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<div class="trip-header-container">
+  <div class="trip-background" style="background-image: url('{{ trip.image_url }}');">
+    <a href="{% url 'list_trips' %}" class="back-to-trips-link">
+      <i class="fas fa-arrow-left"></i>
+    </a>
+    <div class="trip-info-card">
+      <h1>Trip to {{ trip.destination }}</h1>
+      <div class="trip-dates">
+        <i class="far fa-calendar"></i>
+        {{ trip.start_date|date:"n/j" }} - {{ trip.end_date|date:"n/j" }}
       </div>
-      <div class="modal-body">
-        <form id="hotelSearchForm" method="post" action="{% url 'search_hotels' %}">
-          {% csrf_token %}
-          <div class="mb-3">
-            <label for="destination" class="form-label">Destination</label>
-            <input
-              type="text"
-              class="form-control"
-              id="destination"
-              name="destination"
-              value="{{ trip.destination }}"
-              required
-            />
-          </div>
-          <div class="mb-3">
-            <label for="start_date" class="form-label">Check-In Date</label>
-            <input
-                type="date"
-                class="form-control"
-                id="start_date"
-                name="arrival_date"
-                value="{{ trip.start_date|date:'Y-m-d' }}"
-                required
-            />
+      <div class="trip-creator">
+        <span><i class="fas fa-user"></i> {{ trip.user.username }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="trip-content">
+  <div class="reservations-section">
+    <h3>Reservations and attachments</h3>
+    <div class="reservations-container">
+        <div class="reservation-item">
+            <div class="icon-container" title="Search for flights">
+                <i class="fas fa-plane"></i>
+                <span class="hover-text">Flights</span>
+            </div>
+        </div>
+        <div class="reservation-item">
+            <div class="icon-container" data-bs-toggle="modal" data-bs-target="#searchHotelModal" title="Search for lodging">
+                <i class="fas fa-bed"></i>
+                <span class="hover-text">Lodging</span>
+            </div>
+        </div>
+    </div>
+  </div>
+  <div class="modal fade" id="searchHotelModal" tabindex="-1" aria-labelledby="searchHotelModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="searchHotelModalLabel">Search for Accommodation</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="hotelSearchForm" method="post" action="{% url 'search_hotels' %}">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="destination" class="form-label">Destination</label>
+              <input type="text" class="form-control" id="destination" name="destination" value="{{ trip.destination }}"
+                required />
             </div>
             <div class="mb-3">
-                <label for="end_date" class="form-label">Check-Out Date</label>
-                <input
-                    type="date"
-                    class="form-control"
-                    id="end_date"
-                    name="departure_date"
-                    value="{{ trip.end_date|date:'Y-m-d' }}"
-                    required
-                />
+              <label for="start_date" class="form-label">Check-In Date</label>
+              <input type="date" class="form-control" id="start_date" name="arrival_date"
+                value="{{ trip.start_date|date:'Y-m-d' }}" required />
             </div>
-          <button type="submit" class="btn btn-success">Search</button>
-        </form>
+            <div class="mb-3">
+              <label for="end_date" class="form-label">Check-Out Date</label>
+              <input type="date" class="form-control" id="end_date" name="departure_date"
+                value="{{ trip.end_date|date:'Y-m-d' }}" required />
+            </div>
+            <button type="submit" class="btn btn-success">Search</button>
+          </form>
+        </div>
       </div>
+    </div>
+  </div>
+
+  <div class="lists-section">
+    <div class="list-container" id="attractions-list">
+      <div class="list-header">
+        <h3>Places to visit</h3>
+        <span class="place-count">No places</span>
+      </div>
+      <div class="list-items">
+      </div>
+      <a class="add-place-btn" href="{% url 'list_places' trip.id 'attractions' %}">
+        <i class="fas fa-plus"></i>
+        <span>Add place</span>
+      </a>
+    </div>
+
+    <div class="list-container" id="restaurants-list">
+      <div class="list-header">
+        <h3>Restaurants</h3>
+        <span class="place-count">No places</span>
+      </div>
+      <div class="list-items">
+      </div>
+      <a class="add-place-btn" href="{% url 'list_places' trip.id 'restaurants' %}">
+        <i class="fas fa-plus"></i>
+        <span>Add place</span>
+      </a>
+    </div>
+
+    <div class="list-container" id="custom-list">
+      <div class="list-header">
+        <h3 class="editable-title">Add a title (e.g., "Shopping")</h3>
+        <span class="place-count">No places</span>
+      </div>
+      <div class="list-items">
+      </div>
+      <button class="add-place-btn">
+        <i class="fas fa-plus"></i>
+        <span>Add place</span>
+      </button>
     </div>
   </div>
 </div>
