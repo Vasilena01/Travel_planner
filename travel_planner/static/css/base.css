@@ -29,6 +29,11 @@ html {
     -webkit-text-fill-color: transparent;  
 }
 
+nav
+{
+    background-color: #FFF1EB;
+}
+
 .navbar-nav  {
     text-decoration: none;
     background-color: transparent;

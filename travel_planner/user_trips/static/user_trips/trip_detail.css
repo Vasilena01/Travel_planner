@@ -1,0 +1,31 @@
+.back-to-trips-link {
+    display: inline-flex;
+    align-items: center;
+    font-size: 1rem;
+    color: #FF69B4;
+    text-decoration: none;
+    margin-bottom: 15px;
+    transition: color 0.3s ease;
+}
+
+.back-to-trips-link:hover {
+    color: #FF3399;
+}
+
+.back-to-trips-link i {
+    margin-right: 8px;
+}
+
+#searchHotelModal .modal-content {
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+  
+#searchHotelModal .btn-success {
+  background-color: #FFD700;
+  border: none;
+}
+ 
+#searchHotelModal .btn-success:hover {
+  background-color: #E0BF00;
+}

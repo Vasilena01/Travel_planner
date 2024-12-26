@@ -1,9 +1,8 @@
 {% extends "base.html" %} {% load static %} {% block content %}
-<title>WanderWise</title>
 <link rel="stylesheet" type="text/css" href="{% static 'main/styles.css' %}" />
 
-<h1>Welcome to WanderWise</h1>
-<p>Start planning your trips!</p>
+<h1>Welcome to PlanAway</h1>
+<p>Start crafting your unforgettable journeys, step by step!</p>
 
 {% if request.user.is_authenticated %}
 <div class="trips-container">
