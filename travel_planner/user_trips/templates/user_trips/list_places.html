@@ -13,20 +13,35 @@
         {% for place in places %}
         <div class="col">
             <div class="card h-100">
-                {% if place.photos %}
-                    <img src="{{ place.photos.0 }}" class="card-img-top" alt="{{ place.name }}" 
+                {% if place.photo_url %}
+                    <img src="{{ place.photo_url }}" class="card-img-top" alt="{{ place.name }}" 
                          style="height: 200px; object-fit: cover;">
                 {% endif %}
                 <div class="card-body">
                     <h5 class="card-title">{{ place.name }}</h5>
-                    <p class="card-text">{{ place.description|truncatewords:30 }}</p>
-                    <p class="card-text"><small class="text-muted">{{ place.address }}</small></p>
-                    {% if place.rating != 'No rating' %}
-                        <p class="card-text"><small class="text-muted">Rating: {{ place.rating }}</small></p>
+                    {% if place.description != 'No description available' %}
+                        <p class="card-text">{{ place.description|truncatewords:30 }}</p>
                     {% endif %}
-                    <button class="btn btn-primary add-to-list" 
-                            data-place='{"name": "{{ place.name }}", "address": "{{ place.address }}", "photo": "{{ place.photos.0 }}", "type": "{{ place_type }}"}'>
-                        Add to Trip
+                    <p class="card-text"><small class="text-muted">{{ place.address }}</small></p>
+                    <p class="card-text"><strong>Rating:</strong> {{ place.rating }}</p>
+                    {% if place.website %}
+                        <p class="card-text">
+                            <a href="{{ place.website }}" target="_blank" class="btn btn-sm btn-outline-primary">Visit Website</a>
+                        </p>
+                    {% endif %}
+                    {% if place.tel %}
+                        <p class="card-text"><small class="text-muted">Tel: {{ place.tel }}</small></p>
+                    {% endif %}
+                </div>
+                <div class="place-actions">
+                    {% if place.website %}
+                        <a href="{{ place.website }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-globe"></i> Website
+                        </a>
+                    {% endif %}
+                    <button onclick="addPlaceToList('{{ place.name }}', '{{ place.address }}', '{{ place.photo_url }}', '{{ place.rating }}', '{{ place_type }}')" 
+                            class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus"></i> Add to trip
                     </button>
                 </div>
             </div>
@@ -36,42 +51,43 @@
 </div>
 
 <script>
-document.querySelectorAll('.add-to-list').forEach(button => {
-    button.addEventListener('click', function() {
-        const placeData = JSON.parse(this.dataset.place);
+function addPlaceToList(name, address, photoUrl, rating, placeType) {
+    // Get the parent window's document (trip_detail.html)
+    const parentDoc = window.opener.document;
+    
+    // Create new place element
+    const placeElement = document.createElement('div');
+    placeElement.className = 'list-item';
+    placeElement.innerHTML = `
+        ${photoUrl ? `<img src="${photoUrl}" alt="${name}">` : ''}
+        <div class="place-info">
+            <h4>${name}</h4>
+            <p>${address}</p>
+            <span class="rating">${rating}</span>
+        </div>
+    `;
+    
+    // Find the correct list to add the place to
+    const targetList = parentDoc.querySelector(
+        placeType === 'attractions' ? '#attractions-list .list-items' : '#restaurants-list .list-items'
+    );
+    
+    if (targetList) {
+        // Add the place to the list
+        targetList.appendChild(placeElement);
         
-        // Create new place element
-        const placeElement = document.createElement('div');
-        placeElement.className = 'list-item';
-        placeElement.innerHTML = `
-            ${placeData.photo ? `<img src="${placeData.photo}" alt="${placeData.name}">` : ''}
-            <div class="place-info">
-                <h4>${placeData.name}</h4>
-                <p>${placeData.address}</p>
-            </div>
-        `;
-        
-        // Add to appropriate list back on the trip detail page
-        const targetList = window.opener.document.querySelector(
-            placeData.type === 'attractions' ? '#attractions-list .list-items' : '#restaurants-list .list-items'
+        // Update the count
+        const countElement = parentDoc.querySelector(
+            `#${placeType}-list .place-count`
         );
-        
-        if (targetList) {
-            targetList.appendChild(placeElement);
-            
-            // Update place count
-            const countElement = window.opener.document.querySelector(
-                `#${placeData.type}-list .place-count`
-            );
-            if (countElement) {
-                const currentCount = targetList.children.length;
-                countElement.textContent = `${currentCount} place${currentCount !== 1 ? 's' : ''}`;
-            }
-            
-            // Close this window
-            window.close();
+        if (countElement) {
+            const currentCount = targetList.children.length;
+            countElement.textContent = `${currentCount} place${currentCount !== 1 ? 's' : ''}`;
         }
-    });
-});
+        
+        // Close this window
+        window.close();
+    }
+}
 </script>
 {% endblock %}

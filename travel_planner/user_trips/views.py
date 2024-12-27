@@ -2,6 +2,8 @@ import requests
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import MyTrip
+from geopy.geocoders import Nominatim
+from django.http import JsonResponse
 
 
 @login_required
@@ -78,111 +80,119 @@ def delete_trip(request, trip_id):
     next_url = request.GET.get('next', 'list_trips')
     return redirect(next_url)
 
-
 @login_required
 def list_places(request, trip_id, place_type):
     trip = get_object_or_404(MyTrip, id=trip_id, user=request.user)
     
-    api_key = '5ae2e3f221c38a28845f05b6323b362c7d14f9c900dce73db4e93df5'
-    destination = trip.destination.lower().strip()
+    # Foursquare API configuration
+    client_id = 'fsq3FidKW0IcrRsQ5wut/tyyuTkCREEV/ez9oR4Xx5Luajs='
+    destination = trip.destination.strip()
     
     try:
-        # Get coordinates for the destination
-        geoname_url = "https://api.opentripmap.com/0.1/en/places/geoname"
-        geoname_params = {
-            "name": destination,
-            "apikey": api_key
-        }
-                
-        geoname_response = requests.get(geoname_url, params=geoname_params)
+        # Get coordinates using Nominatim
+        geolocator = Nominatim(user_agent="my_travel_planner")
+        location = geolocator.geocode(destination)
         
-        if geoname_response.status_code != 200:
-            return render(request, 'user_trips/list_places.html', 
-                        {'error': f'API Error: {geoname_response.status_code}', 
-                         'trip': trip, 
+        if not location:
+            return render(request, 'user_trips/list_places.html',
+                        {'error': f'Location not found: {destination}',
+                         'trip': trip,
                          'place_type': place_type})
         
-        location_data = geoname_response.json()
+        url = "https://api.foursquare.com/v3/places/search"
         
-        if not location_data:
-            return render(request, 'user_trips/list_places.html', 
-                        {'error': f'Location not found: {destination}', 
-                         'trip': trip, 
-                         'place_type': place_type})
+        # Define category IDs based on place_type
+        if place_type == 'attractions':
+            categories = "16000,10000,10027,10028,10025"  # landmarks, arts, museums
+        else:
+            categories = "13065"  # restaurants
         
-        lat = location_data.get('lat')
-        lon = location_data.get('lon')
-        
-        if not lat or not lon:
-            return render(request, 'user_trips/list_places.html', 
-                        {'error': 'Invalid coordinates received', 
-                         'trip': trip, 
-                         'place_type': place_type})
-        
-        # Search for places
-        radius = 3000
-        kinds = 'museums,historic,architecture,cultural' if place_type == 'attractions' else 'restaurants'
-        
-        places_url = "https://api.opentripmap.com/0.1/en/places/radius"
-        places_params = {
-            "radius": radius,
-            "lon": lon,
-            "lat": lat,
-            "kinds": kinds,
-            "rate": "7",
-            "format": "json",
-            "limit": 10,
-            "apikey": api_key
+        headers = {
+            "accept": "application/json",
+            "Authorization": client_id
         }
         
-        places_response = requests.get(places_url, params=places_params)
+        params = {
+            "ll": f"{location.latitude},{location.longitude}",
+            "categories": categories,
+            "limit": 15,
+            "radius": 3000,
+            "sort": "RATING",
+            "fields": "name,rating,location,photos,description,tel,website"  # Specify fields we want
+        }
         
-        if places_response.status_code != 200:
-            return render(request, 'user_trips/list_places.html', 
-                        {'error': f'Places API Error: {places_response.status_code}', 
-                         'trip': trip, 
+        response = requests.get(url, headers=headers, params=params)
+        
+        if response.status_code != 200:
+            return render(request, 'user_trips/list_places.html',
+                        {'error': f'API Error: {response.status_code}',
+                         'trip': trip,
                          'place_type': place_type})
         
-        places_data = places_response.json()
+        data = response.json()
         formatted_places = []
         
-        for place in places_data:
-            xid = place.get('xid')
-            if not xid:
-                continue
-                
-            detail_url = f"https://api.opentripmap.com/0.1/en/places/xid/{xid}"
-            detail_params = {"apikey": api_key}
+        for place in data.get('results', []):
+            photos = place.get('photos', [])
+            photo_url = None
+            if photos:
+                photo = photos[0]
+                photo_url = f"{photo['prefix']}original{photo['suffix']}"
             
-            detail_response = requests.get(detail_url, params=detail_params)
-            if detail_response.status_code == 200:
-                place_details = detail_response.json()
-                
-                if place_details.get('name'):
-                    formatted_place = {
-                        'name': place_details.get('name', ''),
-                        'address': place_details.get('address', {}).get('road', ''),
-                        'rating': place.get('rate', 'No rating'),
-                        'photos': [place_details.get('preview', {}).get('source', '')] if place_details.get('preview') else [],
-                        'description': place_details.get('wikipedia_extracts', {}).get('text', ''),
-                        'categories': place_details.get('kinds', '').split(',')
-                    }
-                    formatted_places.append(formatted_place)
+            # Format the address properly
+            location_info = place.get('location', {})
+            address_parts = [
+                location_info.get('address'),
+                location_info.get('locality'),
+                location_info.get('region'),
+            ]
+            address = ', '.join(part for part in address_parts if part)
+            
+            formatted_place = {
+                'name': place.get('name', ''),
+                'address': address,
+                'rating': f"{place.get('rating', 'No rating')}/10" if place.get('rating') else 'No rating',
+                'photo_url': photo_url,
+                'description': place.get('description', 'No description available'),
+                'website': place.get('website', ''),
+                'tel': place.get('tel', '')
+            }
+            formatted_places.append(formatted_place)
+        
+        # Sort places by rating (highest first)
+        formatted_places.sort(key=lambda x: float(x['rating'].split('/')[0]) if x['rating'] != 'No rating' else 0, reverse=True)
         
         context = {
-            'places': formatted_places,
+            'places': formatted_places[:15],  # Ensure that the app only shows top 15
             'trip': trip,
             'place_type': place_type
         }
         return render(request, 'user_trips/list_places.html', context)
         
-    except requests.RequestException as e:
-        return render(request, 'user_trips/list_places.html', 
-                     {'error': f'Network error: {str(e)}', 
-                      'trip': trip, 
-                      'place_type': place_type})
     except Exception as e:
-        return render(request, 'user_trips/list_places.html', 
-                     {'error': f'An unexpected error occurred: {str(e)}', 
-                      'trip': trip, 
+        print(f"Error in list_places: {str(e)}")  # Debug print
+        return render(request, 'user_trips/list_places.html',
+                     {'error': f'An error occurred: {str(e)}',
+                      'trip': trip,
                       'place_type': place_type})
+    
+
+@login_required
+def add_place_to_trip(request, trip_id):
+    if request.method == 'POST':
+        trip = get_object_or_404(MyTrip, id=trip_id, user=request.user)
+        place_name = request.POST.get('name')
+        place_type = request.POST.get('place_type')
+        website = request.POST.get('website', '')
+
+        if place_type == 'attractions':
+            if place_name not in trip.attractions:
+                trip.attractions.append({'name': place_name, 'website': website})
+                trip.save()
+        else:
+            if place_name not in trip.restaurants:
+                trip.restaurants.append({'name': place_name, 'website': website})
+                trip.save()
+
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error'}, status=400)
