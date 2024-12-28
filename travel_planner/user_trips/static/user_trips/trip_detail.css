@@ -70,94 +70,88 @@
 }
 
 .trip-content {
-    padding: .5rem;
-    max-width: 300px;
-    align-items: start;
-    margin: .5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
 }
 
 .reservations-section {
-    padding: .5rem;
-    background-color: #FFF1EB;
-    border-radius: 8px;
+    margin: .5rem 0;
+    background: #F5D000;
+    color: #FFF1EB;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .reservations-section h3 {
-    margin-bottom: 1rem;
-    font-size: 1.2rem;
-    color: #8F0047;
+    padding-top: 1rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #FFF1EB;
+    font-size: 1.5rem;
+    font-weight: 600;
 }
 
 .reservations-container {
     display: flex;
-    gap: 1rem;
+    gap: 2rem;
     justify-content: center;
-    align-items: center;
 }
 
 .reservation-item {
     text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    padding: .5rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
 }
 
 .icon-container {
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
+    cursor: pointer;
+    padding-top: .5rem;
+    background: #F5D000;
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+    display: block;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    border-radius: 4px;
+    transition: all 0.2s ease;
 }
 
 .icon-container:hover {
-    background-color: rgba(0, 0, 0, 0.05);
+    background: #FFF1EB;
+    transform: translateY(-5px);
 }
 
 .icon-container i {
-  font-size: 1.5rem;
-  color: #666;
-  margin-bottom: 0.5rem;
+  font-size: 2rem;
+  color: #FFF1EB;
+}
+
+.icon-container:hover i, .icon-container:hover .hover-text {
+  color: #F5D000;
 }
 
 .hover-text {
-  font-size: 0.9rem;
-  color: #666;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.icon-container:hover .hover-text {
-  opacity: 1;
-}
-
-#searchHotelModal .modal-content {
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-  
-#searchHotelModal .btn-success {
-  background-color: #FFD700;
-  border: none;
-}
- 
-#searchHotelModal .btn-success:hover {
-  background-color: #E0BF00;
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #FFF1EB;
 }
 
 .lists-section {
+    display: flex;
+    gap: 2rem;
     margin-top: 2rem;
 }
 
 .list-container {
-    margin-bottom: 2rem;
+    flex: 1;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     padding: 1rem;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    min-width: 300px;
 }
 
 .list-header {
@@ -173,6 +167,11 @@
     margin: 0;
 }
 
+#place-address {
+    color: #CCAD00;
+    font-size: 0.9rem;
+}
+
 .place-count {
     color: #666;
     font-size: 0.9rem;
@@ -183,10 +182,10 @@
     text-decoration: none;
     width: 100%;
     padding: 0.75rem;
-    border: 2px dashed #ddd;
+    border: 2px dashed #F5D000;
     background: none;
     border-radius: 4px;
-    color: #666;
+    color: #F5D000;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -196,9 +195,9 @@
 }
 
 .add-place-btn:hover {
-    border-color: #999;
-    color: #333;
-    background-color: #f8f9fa;
+    border-color: #F5D000;
+    color: #CCAD00;
+    background-color: #FFFCEB;
 }
 
 .new-list-btn {
@@ -224,12 +223,11 @@
 }
 
 .list-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+    position: relative;
 }
 
 .list-item img {
@@ -249,4 +247,49 @@
   margin: 5px 0 0;
   font-size: 14px;
   color: #666;
+}
+
+.delete-btn {
+    position: absolute;
+    bottom: 0.5rem;
+    right: 0.5rem;
+    color: #dc3545;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+    background-color: #dc3545;
+    color: white;
+}
+
+.place-info {
+    margin-bottom: 1.5rem;
+}
+
+.place-name {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+#place-address {
+    display: block;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+  .lists-section {
+      flex-direction: column;
+  }
+
+  .list-container {
+      width: 100%;
+  }
+
+  .reservations-container {
+      flex-wrap: wrap;
+  }
 }

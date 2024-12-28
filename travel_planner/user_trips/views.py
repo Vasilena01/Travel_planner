@@ -4,7 +4,8 @@ from django.contrib.auth.decorators import login_required
 from .models import MyTrip
 from geopy.geocoders import Nominatim
 from django.http import JsonResponse
-
+from urllib.parse import unquote
+from django.conf import settings
 
 @login_required
 def list_trips(request):
@@ -29,10 +30,7 @@ def create_trip(request):
             return redirect('list_trips')
 
         # Pexels API configuration
-        pexels_api_key = "nkOEfBfnkELjeOzNTNQqhQn80bXrrV5yBMWtgf9y1zWfNzWkxBcaVOZ4"
-        headers = {
-            "Authorization": pexels_api_key
-        }
+        headers = {'Authorization': settings.PEXELS_API_KEY}
         
         # Enhanced search query to focus on landmarks and tourist attractions
         search_query = f"{destination} landmarks architecture"
@@ -85,7 +83,7 @@ def list_places(request, trip_id, place_type):
     trip = get_object_or_404(MyTrip, id=trip_id, user=request.user)
     
     # Foursquare API configuration
-    client_id = 'fsq3FidKW0IcrRsQ5wut/tyyuTkCREEV/ez9oR4Xx5Luajs='
+    client_id = settings.FOURSQUARE_API_KEY
     destination = trip.destination.strip()
     
     try:
@@ -170,7 +168,7 @@ def list_places(request, trip_id, place_type):
         return render(request, 'user_trips/list_places.html', context)
         
     except Exception as e:
-        print(f"Error in list_places: {str(e)}")  # Debug print
+        print(f"Error in list_places: {str(e)}")
         return render(request, 'user_trips/list_places.html',
                      {'error': f'An error occurred: {str(e)}',
                       'trip': trip,
@@ -179,20 +177,42 @@ def list_places(request, trip_id, place_type):
 
 @login_required
 def add_place_to_trip(request, trip_id):
-    if request.method == 'POST':
+    trip = get_object_or_404(MyTrip, id=trip_id, user=request.user)
+    place_name = request.GET.get('name')
+    place_address = request.GET.get('address')
+    place_type = request.GET.get('type')
+
+    place_data = {
+        'name': place_name,
+        'address': place_address
+    }
+
+    if place_type == 'attractions':
+        if not any(place['name'] == place_name for place in trip.attractions):
+            trip.attractions.append(place_data)
+    else:
+        if not any(place['name'] == place_name for place in trip.restaurants):
+            trip.restaurants.append(place_data)
+    
+    trip.save()
+    return redirect('trip_detail', trip_id=trip.id)
+
+@login_required
+def delete_place_from_trip(request, trip_id, place_type, place_name):
+    try:
+        decoded_name = unquote(place_name)
         trip = get_object_or_404(MyTrip, id=trip_id, user=request.user)
-        place_name = request.POST.get('name')
-        place_type = request.POST.get('place_type')
-        website = request.POST.get('website', '')
-
+        
         if place_type == 'attractions':
-            if place_name not in trip.attractions:
-                trip.attractions.append({'name': place_name, 'website': website})
-                trip.save()
+            trip.attractions = [place for place in trip.attractions 
+                              if place.get('name') != decoded_name]
         else:
-            if place_name not in trip.restaurants:
-                trip.restaurants.append({'name': place_name, 'website': website})
-                trip.save()
-
-        return JsonResponse({'status': 'success'})
-    return JsonResponse({'status': 'error'}, status=400)
+            trip.restaurants = [place for place in trip.restaurants 
+                              if place.get('name') != decoded_name]
+        
+        trip.save()
+        
+        return redirect('trip_detail', trip_id=trip_id)
+    except Exception as e:
+        print(f"Error deleting place: {e}")
+        return redirect('trip_detail', trip_id=trip_id)

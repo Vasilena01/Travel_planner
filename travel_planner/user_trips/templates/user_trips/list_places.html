@@ -3,7 +3,7 @@
 {% block content %}
 <link rel="stylesheet" type="text/css" href="{% static 'user_trips/list_places.css' %}" />
 <div class="container mt-4">
-    <h2>Add {{ place_type|title }} in {{ trip.destination }}</h2>
+    <h2>List of {{ place_type|title }} in {{ trip.destination }}</h2>
     
     {% if error %}
         <div class="alert alert-danger">{{ error }}</div>
@@ -19,16 +19,13 @@
                 {% endif %}
                 <div class="card-body">
                     <h5 class="card-title">{{ place.name }}</h5>
-                    {% if place.description != 'No description available' %}
+                    {% if place.description %}
                         <p class="card-text">{{ place.description|truncatewords:30 }}</p>
+                    {% else %}
+                        <p class="card-text">No description available</p>
                     {% endif %}
                     <p class="card-text"><small class="text-muted">{{ place.address }}</small></p>
                     <p class="card-text"><strong>Rating:</strong> {{ place.rating }}</p>
-                    {% if place.website %}
-                        <p class="card-text">
-                            <a href="{{ place.website }}" target="_blank" class="btn btn-sm btn-outline-primary">Visit Website</a>
-                        </p>
-                    {% endif %}
                     {% if place.tel %}
                         <p class="card-text"><small class="text-muted">Tel: {{ place.tel }}</small></p>
                     {% endif %}
@@ -39,55 +36,14 @@
                             <i class="fas fa-globe"></i> Website
                         </a>
                     {% endif %}
-                    <button onclick="addPlaceToList('{{ place.name }}', '{{ place.address }}', '{{ place.photo_url }}', '{{ place.rating }}', '{{ place_type }}')" 
-                            class="btn btn-primary btn-sm">
+                    <a href="{% url 'add_place_to_trip' trip.id %}?name={{ place.name|urlencode }}&address={{ place.address|urlencode }}&type={{ place_type }}" 
+                       class="btn btn-primary btn-sm">
                         <i class="fas fa-plus"></i> Add to trip
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
 </div>
-
-<script>
-function addPlaceToList(name, address, photoUrl, rating, placeType) {
-    // Get the parent window's document (trip_detail.html)
-    const parentDoc = window.opener.document;
-    
-    // Create new place element
-    const placeElement = document.createElement('div');
-    placeElement.className = 'list-item';
-    placeElement.innerHTML = `
-        ${photoUrl ? `<img src="${photoUrl}" alt="${name}">` : ''}
-        <div class="place-info">
-            <h4>${name}</h4>
-            <p>${address}</p>
-            <span class="rating">${rating}</span>
-        </div>
-    `;
-    
-    // Find the correct list to add the place to
-    const targetList = parentDoc.querySelector(
-        placeType === 'attractions' ? '#attractions-list .list-items' : '#restaurants-list .list-items'
-    );
-    
-    if (targetList) {
-        // Add the place to the list
-        targetList.appendChild(placeElement);
-        
-        // Update the count
-        const countElement = parentDoc.querySelector(
-            `#${placeType}-list .place-count`
-        );
-        if (countElement) {
-            const currentCount = targetList.children.length;
-            countElement.textContent = `${currentCount} place${currentCount !== 1 ? 's' : ''}`;
-        }
-        
-        // Close this window
-        window.close();
-    }
-}
-</script>
 {% endblock %}

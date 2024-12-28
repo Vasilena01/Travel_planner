@@ -65,7 +65,7 @@
               <input type="date" class="form-control" id="end_date" name="departure_date"
                 value="{{ trip.end_date|date:'Y-m-d' }}" required />
             </div>
-            <button type="submit" class="btn btn-success">Search</button>
+            <button type="submit" class="btn btn-primary">Search</button>
           </form>
         </div>
       </div>
@@ -75,10 +75,23 @@
   <div class="lists-section">
     <div class="list-container" id="attractions-list">
       <div class="list-header">
-        <h3>Places to visit</h3>
-        <span class="place-count">No places</span>
+        <h3>Landmarks and Attractions</h3>
+        <span class="place-count">{{ trip.attractions|length }} places</span>
       </div>
       <div class="list-items">
+        {% for place in trip.attractions %}
+            <div class="list-item">
+                <div class="place-info">
+                  <span>{{ place.name }}</span>
+                  <span id="place-address">{{ place.address }}</span>
+                </div>
+                <a href="{% url 'delete_place_from_trip' trip.id 'attractions' place.name|urlencode %}" 
+                   class="delete-btn" 
+                   onclick="return confirm('Are you sure you want to remove this place?')">
+                    <i class="fas fa-trash"></i>
+                </a>
+            </div>
+        {% endfor %}
       </div>
       <a class="add-place-btn" href="{% url 'list_places' trip.id 'attractions' %}">
         <i class="fas fa-plus"></i>
@@ -89,27 +102,27 @@
     <div class="list-container" id="restaurants-list">
       <div class="list-header">
         <h3>Restaurants</h3>
-        <span class="place-count">No places</span>
+        <span class="place-count">{{ trip.restaurants|length }} places</span>
       </div>
       <div class="list-items">
+        {% for place in trip.restaurants %}
+            <div class="list-item">
+              <div class="place-info">
+                <span>{{ place.name }}</span>
+                <span id="place-address">{{ place.address }}</span>
+              </div>
+                <a href="{% url 'delete_place_from_trip' trip.id 'restaurants' place.name|urlencode %}" 
+                   class="delete-btn" 
+                   onclick="return confirm('Are you sure you want to remove this place?')">
+                    <i class="fas fa-trash"></i>
+                </a>
+            </div>
+        {% endfor %}
       </div>
       <a class="add-place-btn" href="{% url 'list_places' trip.id 'restaurants' %}">
         <i class="fas fa-plus"></i>
         <span>Add place</span>
       </a>
-    </div>
-
-    <div class="list-container" id="custom-list">
-      <div class="list-header">
-        <h3 class="editable-title">Add a title (e.g., "Shopping")</h3>
-        <span class="place-count">No places</span>
-      </div>
-      <div class="list-items">
-      </div>
-      <button class="add-place-btn">
-        <i class="fas fa-plus"></i>
-        <span>Add place</span>
-      </button>
     </div>
   </div>
 </div>

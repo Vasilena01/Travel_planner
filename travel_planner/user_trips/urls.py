@@ -7,5 +7,6 @@ urlpatterns = [
     path('create/', views.create_trip, name='create_trip'),
     path('delete/<int:trip_id>/', views.delete_trip, name='delete_trip'),
     path('trip/<int:trip_id>/places/<str:place_type>/', views.list_places, name='list_places'),
-    # path('trip/<int:trip_id>/add-place/', views.add_place_to_trip, name='add_place_to_trip'),
+    path('trip/<int:trip_id>/add-place/', views.add_place_to_trip, name='add_place_to_trip'),
+    path('trip/<int:trip_id>/delete-place/<str:place_type>/<str:place_name>/', views.delete_place_from_trip, name='delete_place_from_trip'),
 ]
