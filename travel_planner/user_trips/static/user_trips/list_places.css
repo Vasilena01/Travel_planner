@@ -142,3 +142,69 @@ h2 {
         margin-bottom: 1.5rem;
     }
 }
+
+.pagination-container {
+    margin: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.pagination {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: center;
+    color: #F5D000;
+}
+
+.page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.5rem;
+    height: 2.5rem;
+    padding: 0.5rem;
+    border-radius: 4px;
+    background: white;
+    color: #333;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid #dee2e6;
+}
+
+.page-link:hover {
+    background: #f8f9fa;
+    color: #F5D000;
+    border-color: #F5D000;
+}
+
+.page-link.active {
+    background: #F5D000;
+    color: white;
+    border-color: #F5D000;
+}
+
+.first-page,
+.last-page {
+    font-size: 0.9rem;
+}
+
+.page-info {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .pagination {
+        flex-wrap: wrap;
+    }
+    
+    .page-link {
+        min-width: 2rem;
+        height: 2rem;
+        padding: 0.25rem;
+    }
+}

@@ -46,4 +46,35 @@
         {% endfor %}
     </div>
 </div>
+
+<!-- Pagination -->
+<div class="pagination-container">
+    <div class="pagination">
+        {% if places.has_previous %}
+            <a href="?page=1" class="page-link first-page" title="First page">
+                <i class="fas fa-angle-double-left"></i>
+            </a>
+            <a href="?page={{ places.previous_page_number }}" class="page-link">
+                <i class="fas fa-angle-left"></i>
+            </a>
+        {% endif %}
+
+        {% for page_num in page_range %}
+            {% if page_num == current_page %}
+                <span class="page-link active">{{ page_num }}</span>
+            {% else %}
+                <a href="?page={{ page_num }}" class="page-link">{{ page_num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if places.has_next %}
+            <a href="?page={{ places.next_page_number }}" class="page-link">
+                <i class="fas fa-angle-right"></i>
+            </a>
+            <a href="?page={{ total_pages }}" class="page-link last-page" title="Last page">
+                <i class="fas fa-angle-double-right"></i>
+            </a>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}

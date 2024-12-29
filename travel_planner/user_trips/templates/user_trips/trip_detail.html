@@ -3,7 +3,7 @@
 {% block content %}
 <link rel="stylesheet" type="text/css" href="{% static 'user_trips/trip_detail.css' %}" />
 
-
+<!-- Trip header -->
 <div class="trip-header-container">
   <div class="trip-background" style="background-image: url('{{ trip.image_url }}');">
     <a href="{% url 'list_trips' %}" class="back-to-trips-link">
@@ -21,22 +21,25 @@
     </div>
   </div>
 </div>
+
+<!-- Reservations section -->
 <div class="trip-content">
   <div class="reservations-section">
     <h3>Reservations and attachments</h3>
     <div class="reservations-container">
-        <div class="reservation-item">
-            <div class="icon-container" title="Search for flights">
-                <i class="fas fa-plane"></i>
-                <span class="hover-text">Flights</span>
-            </div>
+      <div class="reservation-item">
+        <div class="icon-container" title="Search for flights">
+          <i class="fas fa-plane"></i>
+          <span class="hover-text">Flights</span>
         </div>
-        <div class="reservation-item">
-            <div class="icon-container" data-bs-toggle="modal" data-bs-target="#searchHotelModal" title="Search for lodging">
-                <i class="fas fa-bed"></i>
-                <span class="hover-text">Lodging</span>
-            </div>
+      </div>
+      <div class="reservation-item">
+        <div class="icon-container" data-bs-toggle="modal" data-bs-target="#searchHotelModal"
+          title="Search for lodging">
+          <i class="fas fa-bed"></i>
+          <span class="hover-text">Lodging</span>
         </div>
+      </div>
     </div>
   </div>
   <div class="modal fade" id="searchHotelModal" tabindex="-1" aria-labelledby="searchHotelModalLabel"
@@ -72,58 +75,143 @@
     </div>
   </div>
 
-  <div class="lists-section">
-    <div class="list-container" id="attractions-list">
-      <div class="list-header">
-        <h3>Landmarks and Attractions</h3>
-        <span class="place-count">{{ trip.attractions|length }} places</span>
-      </div>
-      <div class="list-items">
-        {% for place in trip.attractions %}
-            <div class="list-item">
-                <div class="place-info">
-                  <span>{{ place.name }}</span>
-                  <span id="place-address">{{ place.address }}</span>
-                </div>
-                <a href="{% url 'delete_place_from_trip' trip.id 'attractions' place.name|urlencode %}" 
-                   class="delete-btn" 
-                   onclick="return confirm('Are you sure you want to remove this place?')">
-                    <i class="fas fa-trash"></i>
-                </a>
+  <!-- Lists section -->
+  <div class="lists-section-container">
+    <h2>My wishlist</h2>
+    <div class="lists-section">
+      <div class="list-container" id="attractions-list">
+        <div class="list-header">
+          <h3>Landmarks and Attractions</h3>
+          <span class="place-count">{{ trip.attractions|length }} places</span>
+        </div>
+        <div class="list-items">
+          {% for place in trip.attractions %}
+          <div class="list-item">
+            <div class="place-info">
+              <span>{{ place.name }}</span>
+              <span id="place-address">{{ place.address }}</span>
             </div>
-        {% endfor %}
+            <a href="{% url 'delete_place_from_trip' trip.id 'attractions' place.name|urlencode %}" class="delete-btn"
+              onclick="return confirm('Are you sure you want to remove this place?')">
+              <i class="fas fa-trash"></i>
+            </a>
+          </div>
+          {% endfor %}
+        </div>
+        <a class="add-place-btn" href="{% url 'list_places' trip.id 'attractions' %}">
+          <i class="fas fa-plus"></i>
+          <span>Add place</span>
+        </a>
       </div>
-      <a class="add-place-btn" href="{% url 'list_places' trip.id 'attractions' %}">
-        <i class="fas fa-plus"></i>
-        <span>Add place</span>
-      </a>
-    </div>
 
-    <div class="list-container" id="restaurants-list">
-      <div class="list-header">
-        <h3>Restaurants</h3>
-        <span class="place-count">{{ trip.restaurants|length }} places</span>
-      </div>
-      <div class="list-items">
-        {% for place in trip.restaurants %}
-            <div class="list-item">
-              <div class="place-info">
-                <span>{{ place.name }}</span>
-                <span id="place-address">{{ place.address }}</span>
-              </div>
-                <a href="{% url 'delete_place_from_trip' trip.id 'restaurants' place.name|urlencode %}" 
-                   class="delete-btn" 
-                   onclick="return confirm('Are you sure you want to remove this place?')">
-                    <i class="fas fa-trash"></i>
-                </a>
+      <div class="list-container" id="restaurants-list">
+        <div class="list-header">
+          <h3>Restaurants</h3>
+          <span class="place-count">{{ trip.restaurants|length }} places</span>
+        </div>
+        <div class="list-items">
+          {% for place in trip.restaurants %}
+          <div class="list-item">
+            <div class="place-info">
+              <span>{{ place.name }}</span>
+              <span id="place-address">{{ place.address }}</span>
             </div>
-        {% endfor %}
+            <a href="{% url 'delete_place_from_trip' trip.id 'restaurants' place.name|urlencode %}" class="delete-btn"
+              onclick="return confirm('Are you sure you want to remove this place?')">
+              <i class="fas fa-trash"></i>
+            </a>
+          </div>
+          {% endfor %}
+        </div>
+        <a class="add-place-btn" href="{% url 'list_places' trip.id 'restaurants' %}">
+          <i class="fas fa-plus"></i>
+          <span>Add place</span>
+        </a>
       </div>
-      <a class="add-place-btn" href="{% url 'list_places' trip.id 'restaurants' %}">
-        <i class="fas fa-plus"></i>
-        <span>Add place</span>
-      </a>
+    </div>
+  </div>
+
+  <!-- Itinerary section -->
+  <div class="itinerary-section">
+    <h2>Itinerary</h2>
+    <div class="trip-days">
+      {% for day in trip_days %}
+      <div class="day-container">
+        <div class="day-header">
+          <h3>{{ day.date|date:"l, F jS" }}</h3>
+          {% if not trip.attractions and not trip.restaurants %}
+          <a href="{% url 'list_places' trip.id 'attractions' %}" class="btn btn-primary">
+            Add places to your trip first
+          </a>
+          {% else %}
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPlaceModal-{{ day.id }}">
+            Add place to this day
+          </button>
+          {% endif %}
+        </div>
+        <div class="day-places">
+          {% for place in day.places %}
+          <div class="place-card">
+            <div class="place-header">
+              <h4>{{ place.name }}</h4>
+              <a href="{% url 'delete_place_from_day' trip.id day.id forloop.counter0 %}" class="delete-day-place"
+                onclick="return confirm('Are you sure you want to remove this place from the day?')">
+                <i class="fas fa-times"></i>
+              </a>
+            </div>
+            <p>{{ place.address }}</p>
+            <span class="place-type">{{ place.type|title }}</span>
+          </div>
+          {% empty %}
+          <p class="no-places">No places added for this day</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Modal for adding places to a day -->
+      <div class="modal fade" id="addPlaceModal-{{ day.id }}" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Add Place to {{ day.date|date:"l, F jS" }}</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <form action="{% url 'add_place_to_day' trip.id day.id %}" method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                  <label class="form-label">Select Place:</label>
+                  <select name="place_name" class="form-select" required
+                    onchange="updatePlaceType(this, '{{ day.id }}')">
+                    <optgroup label="Attractions">
+                      {% for place in trip.attractions %}
+                      <option value="{{ place.name }}" data-type="attractions">{{ place.name }}</option>
+                      {% endfor %}
+                    </optgroup>
+                    <optgroup label="Restaurants">
+                      {% for place in trip.restaurants %}
+                      <option value="{{ place.name }}" data-type="restaurants">{{ place.name }}</option>
+                      {% endfor %}
+                    </optgroup>
+                  </select>
+                  <input type="hidden" name="place_type" id="place_type_{{ day.id }}" value="attractions">
+                </div>
+                <button type="submit" class="btn btn-primary">Add to Day</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
     </div>
   </div>
 </div>
+
+<script>
+  function updatePlaceType(selectElement, dayId) {
+    const selectedOption = selectElement.options[selectElement.selectedIndex];
+    const placeType = selectedOption.closest('optgroup').label.toLowerCase();
+    document.getElementById(`place_type_${dayId}`).value = placeType;
+  }
+</script>
 {% endblock %}

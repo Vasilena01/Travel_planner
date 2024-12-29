@@ -1,11 +1,14 @@
 import requests
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import MyTrip
+from .models import MyTrip, TripDay
 from geopy.geocoders import Nominatim
 from django.http import JsonResponse
 from urllib.parse import unquote
 from django.conf import settings
+from datetime import timedelta
+import math
+from django.core.paginator import Paginator
 
 @login_required
 def list_trips(request):
@@ -16,7 +19,17 @@ def list_trips(request):
 @login_required
 def trip_detail(request, trip_id):
     trip = get_object_or_404(MyTrip, id=trip_id, user=request.user)
-    return render(request, 'user_trips/trip_detail.html', {'trip': trip})
+    
+    trip.generate_trip_days()
+    
+    # Get all days for this trip
+    trip_days = trip.days.all()
+    
+    context = {
+        'trip': trip,
+        'trip_days': trip_days,
+    }
+    return render(request, 'user_trips/trip_detail.html', context)
 
 
 @login_required
@@ -113,10 +126,10 @@ def list_places(request, trip_id, place_type):
         params = {
             "ll": f"{location.latitude},{location.longitude}",
             "categories": categories,
-            "limit": 15,
+            "limit": 50,
             "radius": 3000,
             "sort": "RATING",
-            "fields": "name,rating,location,photos,description,tel,website"  # Specify fields we want
+            "fields": "name,rating,stats,location,photos,description,tel,website"
         }
         
         response = requests.get(url, headers=headers, params=params)
@@ -137,7 +150,9 @@ def list_places(request, trip_id, place_type):
                 photo = photos[0]
                 photo_url = f"{photo['prefix']}original{photo['suffix']}"
             
-            # Format the address properly
+            rating = place.get('rating', 0)
+            vote_count = place.get('stats', {}).get('ratings', 0)
+            
             location_info = place.get('location', {})
             address_parts = [
                 location_info.get('address'),
@@ -149,7 +164,9 @@ def list_places(request, trip_id, place_type):
             formatted_place = {
                 'name': place.get('name', ''),
                 'address': address,
-                'rating': f"{place.get('rating', 'No rating')}/10" if place.get('rating') else 'No rating',
+                'rating': f"{rating}/10" if rating else 'No rating',
+                'raw_rating': rating or 0,  # Store raw rating for sorting
+                'vote_count': vote_count,
                 'photo_url': photo_url,
                 'description': place.get('description', 'No description available'),
                 'website': place.get('website', ''),
@@ -157,14 +174,49 @@ def list_places(request, trip_id, place_type):
             }
             formatted_places.append(formatted_place)
         
-        # Sort places by rating (highest first)
-        formatted_places.sort(key=lambda x: float(x['rating'].split('/')[0]) if x['rating'] != 'No rating' else 0, reverse=True)
+        # Sort places by rating * vote_count to prioritize highly-rated places with more votes
+        def get_weighted_rating(place):
+            try:
+                rating = place['raw_rating']
+                votes = place['vote_count'] or 0
+                return rating * (votes + 1)
+            except (ValueError, KeyError):
+                return 0
         
+        formatted_places.sort(key=get_weighted_rating, reverse=True)
+        
+        for i, place in enumerate(formatted_places):
+            place['display_rating'] = f"{place['rating']} ({place['vote_count']} votes)"
+        
+        # Page Pagination
+        page_number = request.GET.get('page', 1)
+        paginator = Paginator(formatted_places, 10)
+        page_obj = paginator.get_page(page_number)
+        
+        max_pages = 5
+        current_page = page_obj.number
+        total_pages = paginator.num_pages
+
+        if total_pages <= max_pages:
+            page_range = range(1, total_pages + 1)
+        else:
+            start_page = max(1, current_page - 2)
+            end_page = min(total_pages, start_page + max_pages - 1)
+            
+            if end_page - start_page < max_pages - 1:
+                start_page = max(1, end_page - max_pages + 1)
+            
+            page_range = range(start_page, end_page + 1)
+
         context = {
-            'places': formatted_places[:15],  # Ensure that the app only shows top 15
+            'places': page_obj,
             'trip': trip,
-            'place_type': place_type
+            'place_type': place_type,
+            'page_range': page_range,
+            'total_pages': total_pages,
+            'current_page': current_page
         }
+        
         return render(request, 'user_trips/list_places.html', context)
         
     except Exception as e:
@@ -216,3 +268,46 @@ def delete_place_from_trip(request, trip_id, place_type, place_name):
     except Exception as e:
         print(f"Error deleting place: {e}")
         return redirect('trip_detail', trip_id=trip_id)
+
+@login_required
+def add_place_to_day(request, trip_id, day_id):
+    if request.method == 'POST':
+        trip = get_object_or_404(MyTrip, id=trip_id, user=request.user)
+        trip_day = get_object_or_404(TripDay, id=day_id, trip=trip)
+        
+        place_name = request.POST.get('place_name')
+        place_type = request.POST.get('place_type')
+        
+        # Get the correct list based on place_type
+        place_list = trip.attractions if place_type == 'attractions' else trip.restaurants
+        
+        # Find the place in the corresponding list
+        place_details = next((place for place in place_list if place['name'] == place_name), None)
+        
+        if place_details:
+            if not trip_day.places:
+                trip_day.places = []
+            else:
+                for place in trip_day.places:
+                    if place['name'] == place_name:
+                        return redirect('trip_detail', trip_id=trip_id)
+                
+            trip_day.places.append({
+                'name': place_details['name'],
+                'address': place_details['address'],
+                'type': place_type
+            })
+            trip_day.save()
+            
+    return redirect('trip_detail', trip_id=trip_id)
+
+@login_required
+def delete_place_from_day(request, trip_id, day_id, place_index):
+    trip = get_object_or_404(MyTrip, id=trip_id, user=request.user)
+    trip_day = get_object_or_404(TripDay, id=day_id, trip=trip)
+    
+    if 0 <= place_index < len(trip_day.places):
+        trip_day.places.pop(place_index)
+        trip_day.save()
+    
+    return redirect('trip_detail', trip_id=trip_id)

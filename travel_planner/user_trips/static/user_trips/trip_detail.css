@@ -139,6 +139,14 @@
     color: #FFF1EB;
 }
 
+.lists-section-container {
+    margin-top: 2rem;
+    padding: 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
 .lists-section {
     display: flex;
     gap: 2rem;
@@ -292,4 +300,78 @@
   .reservations-container {
       flex-wrap: wrap;
   }
+}
+
+.itinerary-section {
+    margin-top: 2rem;
+    padding: 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.day-container {
+    margin-bottom: 2rem;
+    padding: 1rem;
+    border: 1px solid #eee;
+    border-radius: 8px;
+}
+
+.day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.day-places {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.place-card {
+    position: relative;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border-left: 4px solid #F5D000;
+}
+
+.place-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 0.5rem;
+}
+
+.delete-day-place {
+    color: #dc3545;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.delete-day-place:hover {
+    background-color: #dc3545;
+    color: white;
+}
+
+.place-card h4 {
+    margin: 0;
+    padding-right: 1rem;
+}
+
+.place-type {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background: #F5D000;
+    color: white;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.no-places {
+    color: #666;
+    font-style: italic;
 }
