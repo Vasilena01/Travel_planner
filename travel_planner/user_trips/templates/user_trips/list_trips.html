@@ -15,13 +15,37 @@
     </button>
 </div>
 
-{% if trips %}
-<div class="trips-container">
-    {% include "list_user_trips.html" %}
+<div class="trips-sections">
+    <!-- Current and Future Trips Section -->
+    <section class="trips-section">
+        <h2 class="section-title">
+            <i class="fas fa-plane-departure"></i>
+            Current & Upcoming Trips
+        </h2>
+        {% if current_future_trips %}
+            <div class="trips-container">
+                {% include "list_user_trips.html" with trips=current_future_trips %}
+            </div>
+        {% else %}
+            <p class="no-trips-message">No upcoming trips planned yet!</p>
+        {% endif %}
+    </section>
+
+    <!-- Past Trips Section -->
+    <section class="trips-section past-trips">
+        <h2 class="section-title">
+            <i class="fas fa-history"></i>
+            Past Trips
+        </h2>
+        {% if past_trips %}
+            <div class="trips-container">
+                {% include "list_user_trips.html" with trips=past_trips %}
+            </div>
+        {% else %}
+            <p class="no-trips-message">No past trips!</p>
+        {% endif %}
+    </section>
 </div>
-{% else %}
-<p>No trips added!</p>
-{% endif %}
 
 {% include "create_trip_modal.html" %}
 {% endblock %}

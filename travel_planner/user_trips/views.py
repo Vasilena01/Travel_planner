@@ -9,11 +9,30 @@ from django.conf import settings
 from datetime import timedelta
 import math
 from django.core.paginator import Paginator
+from django.utils import timezone
+from datetime import date
 
 @login_required
 def list_trips(request):
-    trips = MyTrip.objects.filter(user=request.user)
-    return render(request, 'user_trips/list_trips.html', {'trips': trips})
+    today = date.today()
+    
+    # Get all user's trips and separate them into current/future and past trips
+    current_future_trips = MyTrip.objects.filter(
+        user=request.user,
+        end_date__gte=today
+    ).order_by('start_date')
+    
+    past_trips = MyTrip.objects.filter(
+        user=request.user,
+        end_date__lt=today
+    ).order_by('-end_date')
+    
+    context = {
+        'current_future_trips': current_future_trips,
+        'past_trips': past_trips,
+    }
+    
+    return render(request, 'user_trips/list_trips.html', context)
 
 
 @login_required

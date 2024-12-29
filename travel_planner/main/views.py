@@ -1,18 +1,22 @@
-from datetime import date, timedelta
 from django.shortcuts import render
+from django.utils import timezone
+from datetime import date
 from user_trips.models import MyTrip
 
 def homepage(request):
-    today = date.today()
-    in_one_month = today + timedelta(days=30)
-
     if request.user.is_authenticated:
-        upcoming_trips = MyTrip.objects.filter(
+        today = date.today()
+        
+        # Get only current and future trips
+        current_future_trips = MyTrip.objects.filter(
             user=request.user,
-            start_date__gte=today,
-            end_date__lte=in_one_month
+            end_date__gte=today
         ).order_by('start_date')
+        
+        context = {
+            'current_future_trips': current_future_trips,
+        }
     else:
-        upcoming_trips = None 
+        context = {}
     
-    return render(request, 'main/homepage.html', {'trips': upcoming_trips})
+    return render(request, 'main/homepage.html', context)

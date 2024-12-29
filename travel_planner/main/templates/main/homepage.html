@@ -7,7 +7,7 @@
 {% if request.user.is_authenticated %}
 <div class="trips-container">
     <div class="header-container">
-        <p class="trips-title">Upcoming Trips</p>
+        <p class="trips-title">Current & Upcoming Trips</p>
         <button
             type="button"
             class="btn btn-primary create-trip-btn"
@@ -17,7 +17,7 @@
             <i class="fas fa-plus"></i> Create Trip
         </button>
     </div>
-    {% include "list_user_trips.html" %}
+    {% include "list_user_trips.html" with trips=current_future_trips %}
     {% include "create_trip_modal.html" %}
 </div>
 {% else %}
