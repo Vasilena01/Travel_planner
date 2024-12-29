@@ -191,11 +191,6 @@ h2 {
     font-size: 0.9rem;
 }
 
-.page-info {
-    color: #666;
-    font-size: 0.9rem;
-}
-
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .pagination {

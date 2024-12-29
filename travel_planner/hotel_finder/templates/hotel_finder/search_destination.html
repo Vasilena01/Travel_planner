@@ -86,9 +86,71 @@
       </div>
       {% endfor %}
     </div>
+
+    <!-- Pagination -->
+    {% if hotels.paginator.num_pages > 1 %}
+    <div class="pagination-container">
+        <div class="pagination">
+            {% if hotels.has_previous %}
+                <button type="submit" name="page" value="1" class="page-link first-page" title="First page">
+                    <i class="fas fa-angle-double-left"></i>
+                </button>
+                <button type="submit" name="page" value="{{ hotels.previous_page_number }}" class="page-link">
+                    <i class="fas fa-angle-left"></i>
+                </button>
+            {% endif %}
+
+            {% for num in hotels.paginator.page_range %}
+                {% if num == hotels.number %}
+                    <span class="page-link active">{{ num }}</span>
+                {% else %}
+                    <button type="submit" name="page" value="{{ num }}" class="page-link">{{ num }}</button>
+                {% endif %}
+            {% endfor %}
+
+            {% if hotels.has_next %}
+                <button type="submit" name="page" value="{{ hotels.next_page_number }}" class="page-link">
+                    <i class="fas fa-angle-right"></i>
+                </button>
+                <button type="submit" name="page" value="{{ hotels.paginator.num_pages }}" class="page-link last-page" title="Last page">
+                    <i class="fas fa-angle-double-right"></i>
+                </button>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
   </div>
   {% else %}
   <p id="no-hotels-msg">No hotels found. Please try again with different details.</p>
   {% endif %} 
+
+  <!-- Hidden form for pagination in order to keep the search params -->
+  <form id="pagination-form" method="POST" style="display: none;">
+    {% csrf_token %}
+    <input type="hidden" name="destination" value="{{ search_params.destination }}">
+    <input type="hidden" name="arrival_date" value="{{ search_params.arrival_date }}">
+    <input type="hidden" name="departure_date" value="{{ search_params.departure_date }}">
+    <input type="hidden" name="adults" value="{{ search_params.adults }}">
+    <input type="hidden" name="children_age" value="{{ search_params.children }}">
+    <input type="hidden" name="room_qty" value="{{ search_params.rooms }}">
+  </form>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.page-link').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const pageNum = this.value;
+            const form = document.getElementById('pagination-form');
+            const pageInput = document.createElement('input');
+            pageInput.type = 'hidden';
+            pageInput.name = 'page';
+            pageInput.value = pageNum;
+            form.appendChild(pageInput);
+            form.submit();
+        });
+    });
+});
+</script>
 {% endblock %}

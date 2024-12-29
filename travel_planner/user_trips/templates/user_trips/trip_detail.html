@@ -181,20 +181,24 @@
                 {% csrf_token %}
                 <div class="mb-3">
                   <label class="form-label">Select Place:</label>
-                  <select name="place_name" class="form-select" required
+                  <select name="place_name" class="form-select" required id="place_select_{{ day.id }}"
                     onchange="updatePlaceType(this, '{{ day.id }}')">
+                    {% if trip.attractions %}
                     <optgroup label="Attractions">
                       {% for place in trip.attractions %}
                       <option value="{{ place.name }}" data-type="attractions">{{ place.name }}</option>
                       {% endfor %}
                     </optgroup>
+                    {% endif %}
+                    {% if trip.restaurants %}
                     <optgroup label="Restaurants">
                       {% for place in trip.restaurants %}
                       <option value="{{ place.name }}" data-type="restaurants">{{ place.name }}</option>
                       {% endfor %}
                     </optgroup>
+                    {% endif %}
                   </select>
-                  <input type="hidden" name="place_type" id="place_type_{{ day.id }}" value="attractions">
+                  <input type="hidden" name="place_type" id="place_type_{{ day.id }}" value="">
                 </div>
                 <button type="submit" class="btn btn-primary">Add to Day</button>
               </form>
@@ -208,10 +212,20 @@
 </div>
 
 <script>
-  function updatePlaceType(selectElement, dayId) {
+function updatePlaceType(selectElement, dayId) {
     const selectedOption = selectElement.options[selectElement.selectedIndex];
     const placeType = selectedOption.closest('optgroup').label.toLowerCase();
     document.getElementById(`place_type_${dayId}`).value = placeType;
-  }
+}
+
+// Set initial place type when modal opens
+document.addEventListener('DOMContentLoaded', function() {
+    // Find all place selects on the page
+    document.querySelectorAll('select[name="place_name"]').forEach(select => {
+        // Get the day ID from the select's ID
+        const dayId = select.id.replace('place_select_', '');
+        updatePlaceType(select, dayId);
+    });
+});
 </script>
 {% endblock %}
