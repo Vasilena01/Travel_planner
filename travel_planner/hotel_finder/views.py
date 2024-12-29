@@ -3,6 +3,7 @@ from datetime import datetime
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from travel_planner.settings import RAPID_API_KEY
 
 @login_required
 def search_hotels(request):
@@ -32,7 +33,7 @@ def search_hotels(request):
 
         try:
             headers = {
-                'x-rapidapi-key': "25aa21455dmsh86b46541b28213bp1489a5jsn374b2d97cd64",
+                'x-rapidapi-key': RAPID_API_KEY,
                 'x-rapidapi-host': "booking-com15.p.rapidapi.com"
             }
 

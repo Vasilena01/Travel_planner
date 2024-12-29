@@ -147,3 +147,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # API Keys
 PEXELS_API_KEY = os.getenv('PEXELS_API_KEY')
 FOURSQUARE_API_KEY = os.getenv('FOURSQUARE_API_KEY')
+RAPID_API_KEY = os.getenv('RAPID_API_KEY')
