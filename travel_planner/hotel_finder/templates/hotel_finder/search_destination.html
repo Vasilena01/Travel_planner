@@ -83,6 +83,9 @@
           {{hotel.property.priceBreakdown.grossPrice.currency }}
         </p>
         <p>Review score: {{ hotel.property.reviewScore }} / 10</p>
+        <a href="{{ hotel.bookingUrl }}" target="_blank" class="btn btn-primary book-btn">
+          Book Hotel
+        </a>
       </div>
       {% endfor %}
     </div>

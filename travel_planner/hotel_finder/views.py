@@ -75,6 +75,24 @@ def search_hotels(request):
                     if not page_hotels:
                         break
                         
+                    for hotel in page_hotels:
+                        # Add booking URL to each hotel
+                        checkin_date = search_params['arrival_date']
+                        checkout_date = search_params['departure_date']
+                        adults = search_params['adults']
+                        rooms = search_params['rooms']
+                        
+                        # Construct booking.com URL with search parameters and location info
+                        hotel['bookingUrl'] = (
+                            f"https://www.booking.com/searchresults.html"
+                            f"?dest_id={dest_id}"
+                            f"&dest_type=city"
+                            f"&checkin={checkin_date}"
+                            f"&checkout={checkout_date}"
+                            f"&group_adults={adults}"
+                            f"&no_rooms={rooms}"
+                            f"&selected_currency=USD"
+                        )
                     all_hotels.extend(page_hotels)
                     page += 1
 
