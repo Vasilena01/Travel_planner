@@ -6,11 +6,10 @@ from geopy.geocoders import Nominatim
 from django.http import JsonResponse
 from urllib.parse import unquote
 from django.conf import settings
-from datetime import timedelta
+from datetime import date, timedelta
 import math
 from django.core.paginator import Paginator
 from django.utils import timezone
-from datetime import date
 
 @login_required
 def list_trips(request):

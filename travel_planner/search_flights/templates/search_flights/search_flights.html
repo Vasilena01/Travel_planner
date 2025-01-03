@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'search_flights/search_flights.css' %}">
+
+<div class="search-flights-container">
+    <h1>Search Flights</h1>
+
+    {% if error_message %}
+    <div class="alert alert-danger">
+        {{ error_message }}
+    </div>
+    {% endif %}
+
+    <div class="search-form-container">
+        <form method="POST" class="search-form">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="from_location">From:</label>
+                    <input type="text" 
+                           id="from_location" 
+                           name="from_location" 
+                           class="form-control" 
+                           required 
+                           value="{{ search_params.from_location|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label for="to_location">To:</label>
+                    <input type="text" 
+                           id="to_location" 
+                           name="to_location" 
+                           class="form-control" 
+                           required 
+                           value="{{ search_params.to_location|default:'' }}">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="departure_date">Departure Date:</label>
+                    <input type="date" 
+                           id="departure_date" 
+                           name="departure_date" 
+                           class="form-control" 
+                           required 
+                           min="{{ current_date }}"
+                           value="{{ search_params.departure_date|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label for="return_date">Return Date:</label>
+                    <input type="date" 
+                           id="return_date" 
+                           name="return_date" 
+                           class="form-control" 
+                           min="{{ current_date }}"
+                           value="{{ search_params.return_date|default:'' }}">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="adults">Adults:</label>
+                    <input type="number" 
+                           id="adults" 
+                           name="adults" 
+                           class="form-control" 
+                           min="1" 
+                           value="{{ search_params.adults|default:'1' }}">
+                </div>
+                <div class="form-group">
+                    <label for="children">Children:</label>
+                    <input type="number" 
+                           id="children" 
+                           name="children" 
+                           class="form-control" 
+                           min="0" 
+                           value="{{ search_params.children|default:'0' }}">
+                </div>
+                <div class="form-group">
+                    <label for="cabin_class">Cabin Class:</label>
+                    <select id="cabin_class" name="cabin_class" class="form-control">
+                        <option value="ECONOMY" {% if search_params.cabin_class == 'ECONOMY' %}selected{% endif %}>Economy</option>
+                        <option value="BUSINESS" {% if search_params.cabin_class == 'BUSINESS' %}selected{% endif %}>Business</option>
+                        <option value="FIRST" {% if search_params.cabin_class == 'FIRST' %}selected{% endif %}>First Class</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary search-btn">
+                <i class="fas fa-search"></i> Search Flights
+            </button>
+        </form>
+    </div>
+
+    {% if flights %}
+    <div class="flights-results">
+        <h2>Available Flights</h2>
+        <div class="flights-container">
+            {% for flight in flights %}
+            <div class="flight-card">
+                <div class="flight-header">
+                    <div class="airline">
+                        <img src="{{ flight.airline.logo }}" alt="{{ flight.airline.name }}" class="airline-logo">
+                        <span>{{ flight.airline.name }}</span>
+                    </div>
+                    <div class="flight-price">
+                        {{ flight.price.currency }} {{ flight.price.amount|floatformat:2 }}
+                    </div>
+                </div>
+                
+                <div class="flight-details">
+                    <div class="departure">
+                        <strong>{{ flight.departure.airport.code }}</strong>
+                        <span>{{ flight.departure.time|date:"H:i" }}</span>
+                    </div>
+                    <div class="flight-duration">
+                        <div class="duration-line"></div>
+                        <span>{{ flight.duration }}</span>
+                    </div>
+                    <div class="arrival">
+                        <strong>{{ flight.arrival.airport.code }}</strong>
+                        <span>{{ flight.arrival.time|date:"H:i" }}</span>
+                    </div>
+                </div>
+
+                <div class="flight-info">
+                    <span class="stops">
+                        {% if flight.stops == 0 %}
+                            Direct Flight
+                        {% else %}
+                            {{ flight.stops }} stop{{ flight.stops|pluralize }}
+                        {% endif %}
+                    </span>
+                    <span class="cabin-class">{{ flight.cabinClass }}</span>
+                </div>
+
+                <a href="{{ flight.bookingLink }}" target="_blank" class="btn btn-primary book-btn">
+                    Book Flight
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

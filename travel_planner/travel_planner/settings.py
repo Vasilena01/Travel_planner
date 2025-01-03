@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'main',
     'authentication',
     'hotel_finder',
-    'user_trips'
+    'user_trips',
+    'search_flights',
 ]
 
 MIDDLEWARE = [
