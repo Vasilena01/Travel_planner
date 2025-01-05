@@ -101,12 +101,12 @@ def search_flights(request):
 
             conn.close()
 
-
             if data.get('status') and data.get('data', {}).get('flightOffers'):
                 # Extract all relevant data from the API response
                 flights = []
                 for offer in data['data']['flightOffers']:
-                    flight_info = {
+                    # Create outbound flight info
+                    outbound_flight = {
                         'airline': {
                             'name': offer['segments'][0]['legs'][0]['carriersData'][0]['name'],
                             'logo': offer['segments'][0]['legs'][0]['carriersData'][0]['logo']
@@ -139,12 +139,56 @@ def search_flights(request):
                             f"&label=gen173nr-1FCAEoggI46AdIM1gEaGyIAQGYAQm4ARfIAQzYAQHoAQH4AQKIAgGoAgO4AqWs7a0GwAIB"
                             f"&sid=null"
                             f"&token={offer['token']}"
-                            f"&fromId={from_location}"
-                            f"&toId={to_location}"
+                            f"&fromId={from_id}"
+                            f"&toId={to_id}"
                             f"&source=search_form"
-                        )
+                        ),
+                        'direction': 'outbound'
                     }
-                    flights.append(flight_info)
+                    flights.append(outbound_flight)
+
+                    # If there's a return flight (second segment)
+                    if return_date and len(offer['segments']) > 1:
+                        return_flight = {
+                            'airline': {
+                                'name': offer['segments'][1]['legs'][0]['carriersData'][0]['name'],
+                                'logo': offer['segments'][1]['legs'][0]['carriersData'][0]['logo']
+                            },
+                            'price': {
+                                'amount': offer['priceBreakdown']['total']['units'] + 
+                                        offer['priceBreakdown']['total']['nanos'] / 1000000000,
+                                'currency': offer['priceBreakdown']['total']['currencyCode']
+                            },
+                            'departure': {
+                                'airport': {
+                                    'code': offer['segments'][1]['departureAirport']['code'],
+                                    'name': offer['segments'][1]['departureAirport']['name']
+                                },
+                                'time': datetime.strptime(offer['segments'][1]['departureTime'], "%Y-%m-%dT%H:%M:%S")
+                            },
+                            'arrival': {
+                                'airport': {
+                                    'code': offer['segments'][1]['arrivalAirport']['code'],
+                                    'name': offer['segments'][1]['arrivalAirport']['name']
+                                },
+                                'time': datetime.strptime(offer['segments'][1]['arrivalTime'], "%Y-%m-%dT%H:%M:%S")
+                            },
+                            'duration': f"{offer['segments'][1]['totalTime'] // 3600}h {(offer['segments'][1]['totalTime'] % 3600) // 60}m",
+                            'stops': len(offer['segments'][1]['legs']) - 1,
+                            'cabinClass': offer['segments'][1]['legs'][0]['cabinClass'].title(),
+                            'bookingLink': (
+                                f"https://www.booking.com/flights/details.html"
+                                f"?aid=304142"
+                                f"&label=gen173nr-1FCAEoggI46AdIM1gEaGyIAQGYAQm4ARfIAQzYAQHoAQH4AQKIAgGoAgO4AqWs7a0GwAIB"
+                                f"&sid=null"
+                                f"&token={offer['token']}"
+                                f"&fromId={from_id}"
+                                f"&toId={to_id}"
+                                f"&source=search_form"
+                            ),
+                            'direction': 'return'
+                        }
+                        flights.append(return_flight)
 
                 context = {
                     'flights': flights,

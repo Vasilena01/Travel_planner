@@ -48,9 +48,10 @@
 
 .flight-card {
     background: white;
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    margin-bottom: 16px;
 }
 
 .flight-header {
@@ -79,48 +80,103 @@
 }
 
 .flight-details {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
+    display: flex;
     align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    justify-content: space-between;
+    width: 100%;
+    margin: 20px 0;
 }
 
-.duration-line {
-    height: 2px;
-    background: #ddd;
+.time-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.time {
+    font-size: 1.2em;
+    font-weight: bold;
+    display: block;
+}
+
+.date {
+    font-size: 0.8em;
+    color: #6b6b6b;
+    display: block;
+}
+
+.airport {
+    font-weight: bold;
+    display: block;
+    margin: 4px 0;
+}
+
+.flight-path {
+    flex: 1;
+    margin: 0 20px;
+}
+
+.connection-line {
     position: relative;
+    text-align: center;
+    margin: 10px 0;
 }
 
-.duration-line::before,
-.duration-line::after {
+.flight-line {
+    border: none;
+    height: 2px;
+    background: #ccc;
+    position: relative;
+    margin: 10px 0;
+}
+
+.flight-line:before,
+.flight-line:after {
     content: '';
     position: absolute;
     width: 8px;
     height: 8px;
-    background: #ddd;
+    background: #ccc;
     border-radius: 50%;
-    top: 50%;
-    transform: translateY(-50%);
+    top: -3px;
 }
 
-.duration-line::before {
+.flight-line:before {
     left: 0;
 }
 
-.duration-line::after {
+.flight-line:after {
     right: 0;
 }
 
-.flight-info {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 1rem;
+.direct-text,
+.stops-text {
+    font-size: 0.8em;
     color: #666;
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+}
+
+.round-trip-card {
+    border: 1px solid #ddd;
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.return-flight {
+    margin-top: 15px;
+    border-top: 1px dashed #ddd;
+    padding-top: 15px;
 }
 
 .book-btn {
     width: 100%;
+    margin-top: 15px;
 }
 
 @media (max-width: 768px) {
@@ -131,4 +187,112 @@
     .flight-card {
         padding: 1rem;
     }
+}
+
+.flight-tags {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.tag {
+    font-size: 0.8em;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.tag.best {
+    background-color: #F5D000;
+    color: #2C1810;
+}
+
+.tag.direct {
+    background-color: #F5D000;
+    color: #2C1810;
+}
+
+.tag.flexible {
+    color: #D4418E;
+    background-color: rgba(212, 65, 142, 0.1);
+}
+
+.flight-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.luggage-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #2C1810;
+    font-size: 0.9em;
+}
+
+.luggage-info i {
+    font-size: 1.2em;
+    color: #D4418E;
+}
+
+.price-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.price {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #000;
+}
+
+.view-details {
+    background-color: #F5D000;
+    color: #2C1810;
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.duration {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.8em;
+    color: #2C1810;
+    background: white;
+    padding: 0 8px;
+}
+
+.stops-text {
+    position: static;
+    transform: none;
+    font-size: 0.8em;
+    color: #2C1810;
+    background: white;
+    padding: 0 8px;
+    white-space: nowrap;
+}
+
+.flight-info-below-line {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.duration-text,
+.stops-text {
+    font-size: 0.8em;
+    color: #2C1810;
+    background: white;
+    padding: 0 8px;
+    white-space: nowrap;
 }
