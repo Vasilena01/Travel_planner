@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 import requests
+from django.core.paginator import Paginator
 
 def get_destination_id(query, headers):
     """Helper function to get destination ID from the API"""
@@ -189,6 +190,100 @@ def search_flights(request):
                             'direction': 'return'
                         }
                         flights.append(return_flight)
+
+                # Add this right after processing all flights (after the flights.append(return_flight) loop)
+                if flights:
+                    # Define Paris airports
+                    paris_airports = ['CDG', 'BVA', 'ORY']
+                    
+                    # Create pairs of outbound and return flights
+                    flight_pairs = []
+                    outbound_flights = []
+                    return_flights = []
+                    
+                    # First, separate and filter flights
+                    for flight in flights:
+                        if flight['direction'] == 'outbound':
+                            if flight['arrival']['airport']['code'] in paris_airports:
+                                outbound_flights.append(flight)
+                        else:  # return flights
+                            if flight['departure']['airport']['code'] in paris_airports:
+                                return_flights.append(flight)
+                    
+                    # Sort flights to prioritize main airport (CDG)
+                    outbound_flights.sort(key=lambda x: 0 if x['arrival']['airport']['code'] == 'CDG' else 1)
+                    return_flights.sort(key=lambda x: 0 if x['departure']['airport']['code'] == 'CDG' else 1)
+
+                    # Add tags to outbound flights
+                    if outbound_flights:
+                        prices = [f['price']['amount'] for f in outbound_flights]
+                        durations = [int(''.join(filter(str.isdigit, f['duration']))) for f in outbound_flights]
+                        min_price = min(prices)
+                        min_duration = min(durations)
+                        avg_price = sum(prices) / len(prices)
+
+                        for flight in outbound_flights:
+                            flight['tags'] = []
+                            current_duration = int(''.join(filter(str.isdigit, flight['duration'])))
+                            
+                            if flight['price']['amount'] == min_price:
+                                flight['tags'].append({'type': 'cheapest', 'text': 'Cheapest'})
+                            
+                            if current_duration == min_duration:
+                                flight['tags'].append({'type': 'fastest', 'text': 'Fastest'})
+                            
+                            # Best value analysis
+                            price_ratio = flight['price']['amount'] / avg_price
+                            duration_ratio = current_duration / min_duration
+                            if price_ratio + duration_ratio <= 2.2:
+                                flight['tags'].append({'type': 'best', 'text': 'Best'})
+                            
+                            if flight['stops'] == 0:
+                                flight['tags'].append({'type': 'direct', 'text': 'Direct'})
+
+                    # Add tags to return flights
+                    if return_flights:
+                        prices = [f['price']['amount'] for f in return_flights]
+                        durations = [int(''.join(filter(str.isdigit, f['duration']))) for f in return_flights]
+                        min_price = min(prices)
+                        min_duration = min(durations)
+                        avg_price = sum(prices) / len(prices)
+
+                        for flight in return_flights:
+                            flight['tags'] = []
+                            current_duration = int(''.join(filter(str.isdigit, flight['duration'])))
+                            
+                            if flight['price']['amount'] == min_price:
+                                flight['tags'].append({'type': 'cheapest', 'text': 'Cheapest'})
+                            
+                            if current_duration == min_duration:
+                                flight['tags'].append({'type': 'fastest', 'text': 'Fastest'})
+                            
+                            # Best value analysis
+                            price_ratio = flight['price']['amount'] / avg_price
+                            duration_ratio = current_duration / min_duration
+                            if price_ratio + duration_ratio <= 2.2:
+                                flight['tags'].append({'type': 'best', 'text': 'Best'})
+                            
+                            if flight['stops'] == 0:
+                                flight['tags'].append({'type': 'direct', 'text': 'Direct'})
+
+                    # Create pairs of outbound and return flights
+                    for outbound in outbound_flights:
+                        matching_return = next((rf for rf in return_flights 
+                                             if rf['departure']['airport']['code'] == outbound['arrival']['airport']['code']), 
+                                            None)
+                        if matching_return:
+                            flight_pairs.append({
+                                'outbound': outbound,
+                                'return': matching_return
+                            })
+
+                    # Paginate the pairs instead of individual flights
+                    paginator = Paginator(flight_pairs, 5)
+                    page_number = request.GET.get('page', 1)
+                    page_obj = paginator.get_page(page_number)
+                    flights = page_obj
 
                 context = {
                     'flights': flights,
