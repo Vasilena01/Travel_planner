@@ -190,7 +190,35 @@
                 </div>
             {% endfor %}
         </div>
+
+        <!-- Add scroll to top button -->
+        <button id="scrollToTop" class="scroll-to-top">
+            <i class="fas fa-arrow-up"></i>
+        </button>
     </div>
     {% endif %}
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const scrollToTopButton = document.getElementById('scrollToTop');
+        
+        // Show/hide button based on scroll position
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                scrollToTopButton.classList.add('visible');
+            } else {
+                scrollToTopButton.classList.remove('visible');
+            }
+        });
+        
+        // Scroll to top when clicked
+        scrollToTopButton.addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    });
+</script>
 {% endblock %}

@@ -103,7 +103,6 @@ def search_flights(request):
             conn.close()
 
             if data.get('status') and data.get('data', {}).get('flightOffers'):
-                # Extract all relevant data from the API response
                 flights = []
                 for offer in data['data']['flightOffers']:
                     # Create outbound flight info
@@ -191,7 +190,6 @@ def search_flights(request):
                         }
                         flights.append(return_flight)
 
-                # Add this right after processing all flights (after the flights.append(return_flight) loop)
                 if flights:
                     # Define Paris airports
                     paris_airports = ['CDG', 'BVA', 'ORY']
@@ -279,11 +277,7 @@ def search_flights(request):
                                 'return': matching_return
                             })
 
-                    # Paginate the pairs instead of individual flights
-                    paginator = Paginator(flight_pairs, 5)
-                    page_number = request.GET.get('page', 1)
-                    page_obj = paginator.get_page(page_number)
-                    flights = page_obj
+                    flights = flight_pairs
 
                 context = {
                     'flights': flights,
