@@ -191,10 +191,6 @@ def search_flights(request):
                         flights.append(return_flight)
 
                 if flights:
-                    # Define Paris airports
-                    paris_airports = ['CDG', 'BVA', 'ORY']
-                    
-                    # Create pairs of outbound and return flights
                     flight_pairs = []
                     outbound_flights = []
                     return_flights = []
@@ -202,15 +198,16 @@ def search_flights(request):
                     # First, separate and filter flights
                     for flight in flights:
                         if flight['direction'] == 'outbound':
-                            if flight['arrival']['airport']['code'] in paris_airports:
-                                outbound_flights.append(flight)
-                        else:  # return flights
-                            if flight['departure']['airport']['code'] in paris_airports:
-                                return_flights.append(flight)
+                            outbound_flights.append(flight)
+                        else:
+                            return_flights.append(flight)
                     
-                    # Sort flights to prioritize main airport (CDG)
-                    outbound_flights.sort(key=lambda x: 0 if x['arrival']['airport']['code'] == 'CDG' else 1)
-                    return_flights.sort(key=lambda x: 0 if x['departure']['airport']['code'] == 'CDG' else 1)
+                    # Sort flights by price
+                    outbound_flights.sort(key=lambda x: x['price']['amount'])
+                    return_flights.sort(key=lambda x: x['price']['amount'])
+
+                    # Replace the flights list with all flights
+                    flights = outbound_flights + return_flights
 
                     # Add tags to outbound flights
                     if outbound_flights:
