@@ -64,7 +64,6 @@ def search_flights(request):
                 error_message = "Please fill in all required fields."
                 raise ValueError(error_message)
             
-            # Validate date format
             date_format = '%Y-%m-%d'
             try:
                 datetime.strptime(departure_date, date_format)
@@ -147,7 +146,7 @@ def search_flights(request):
                     }
                     flights.append(outbound_flight)
 
-                    # If there's a return flight (second segment)
+                    # Get return flight data
                     if return_date and len(offer['segments']) > 1:
                         return_flight = {
                             'airline': {
@@ -195,7 +194,6 @@ def search_flights(request):
                     outbound_flights = []
                     return_flights = []
                     
-                    # First, separate and filter flights
                     for flight in flights:
                         if flight['direction'] == 'outbound':
                             outbound_flights.append(flight)
@@ -206,10 +204,8 @@ def search_flights(request):
                     outbound_flights.sort(key=lambda x: x['price']['amount'])
                     return_flights.sort(key=lambda x: x['price']['amount'])
 
-                    # Replace the flights list with all flights
                     flights = outbound_flights + return_flights
 
-                    # Add tags to outbound flights
                     if outbound_flights:
                         prices = [f['price']['amount'] for f in outbound_flights]
                         durations = [int(''.join(filter(str.isdigit, f['duration']))) for f in outbound_flights]
@@ -227,7 +223,6 @@ def search_flights(request):
                             if current_duration == min_duration:
                                 flight['tags'].append({'type': 'fastest', 'text': 'Fastest'})
                             
-                            # Best value analysis
                             price_ratio = flight['price']['amount'] / avg_price
                             duration_ratio = current_duration / min_duration
                             if price_ratio + duration_ratio <= 2.2:
@@ -254,7 +249,6 @@ def search_flights(request):
                             if current_duration == min_duration:
                                 flight['tags'].append({'type': 'fastest', 'text': 'Fastest'})
                             
-                            # Best value analysis
                             price_ratio = flight['price']['amount'] / avg_price
                             duration_ratio = current_duration / min_duration
                             if price_ratio + duration_ratio <= 2.2:
@@ -263,7 +257,6 @@ def search_flights(request):
                             if flight['stops'] == 0:
                                 flight['tags'].append({'type': 'direct', 'text': 'Direct'})
 
-                    # Create pairs of outbound and return flights
                     for outbound in outbound_flights:
                         matching_return = next((rf for rf in return_flights 
                                              if rf['departure']['airport']['code'] == outbound['arrival']['airport']['code']), 
