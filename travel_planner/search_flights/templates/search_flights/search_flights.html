@@ -1,18 +1,14 @@
 {% extends "base.html" %}
 {% load static %}
-
 {% block content %}
 <link rel="stylesheet" href="{% static 'search_flights/search_flights.css' %}">
-
 <div class="search-flights-container">
     <h1>Search Flights</h1>
-
     {% if error_message %}
     <div class="alert alert-danger">
         {{ error_message }}
     </div>
     {% endif %}
-
     <div class="search-form-container">
         <form method="POST" class="search-form">
             {% csrf_token %}
@@ -36,7 +32,6 @@
                            value="{{ search_params.to_location|default:'' }}">
                 </div>
             </div>
-
             <div class="form-row">
                 <div class="form-group">
                     <label for="departure_date">Departure Date:</label>
@@ -58,7 +53,6 @@
                            value="{{ search_params.return_date|default:'' }}">
                 </div>
             </div>
-
             <div class="form-row">
                 <div class="form-group">
                     <label for="adults">Adults:</label>
@@ -136,8 +130,7 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Return Flight (removed title) -->
+                    <!-- Return Flight -->
                     <div class="flight-card return-flight">
                         <div class="flight-tags">
                             {% for tag in pair.return.tags %}
@@ -190,35 +183,7 @@
                 </div>
             {% endfor %}
         </div>
-
-        <!-- Add scroll to top button -->
-        <button id="scrollToTop" class="scroll-to-top">
-            <i class="fas fa-arrow-up"></i>
-        </button>
     </div>
     {% endif %}
 </div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const scrollToTopButton = document.getElementById('scrollToTop');
-        
-        // Show/hide button based on scroll position
-        window.addEventListener('scroll', function() {
-            if (window.pageYOffset > 300) {
-                scrollToTopButton.classList.add('visible');
-            } else {
-                scrollToTopButton.classList.remove('visible');
-            }
-        });
-        
-        // Scroll to top when clicked
-        scrollToTopButton.addEventListener('click', function() {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        });
-    });
-</script>
 {% endblock %}
