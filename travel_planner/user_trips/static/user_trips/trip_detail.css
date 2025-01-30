@@ -74,6 +74,95 @@
     padding: 2rem;
 }
 
+.trip-header-container {
+    position: relative;
+}
+
+.add-collaborator-btn {
+    position: absolute;
+    bottom: 60px;
+    right: 20px;
+    background-color: rgba(44, 24, 16, 0.7);
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.add-collaborator-btn:hover {
+    background-color: rgba(44, 24, 16, 0.9);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.modal-content {
+    border: none;
+    border-radius: 15px;
+}
+
+.modal-header {
+    border-bottom: none;
+    border-radius: 15px 15px 0 0;
+}
+
+.modal-title {
+    color: #2C1810;
+}
+
+.form-select {
+    background-color: white;
+}
+
+.form-select:focus {
+    border-color: #F5D000;
+    box-shadow: 0 0 0 0.25rem rgba(245, 208, 0, 0.25);
+}
+
+.modal .btn-primary {
+    background-color: #F5D000;
+    border-color: #F5D000;
+    color: #2C1810;
+}
+
+.modal .btn-primary:hover {
+    background-color: #FFE033;
+    border-color: #FFE033;
+    color: #2C1810;
+}
+
+.modal .btn-close {
+    color: #2C1810;
+}
+
+.collaborators-list {
+    position: absolute;
+    bottom: 10px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: rgba(44, 24, 16, 0.7);
+    padding: 8px 15px;
+    border-radius: 20px;
+    z-index: 10;
+}
+
+.collaborators-label {
+    color: white;
+    font-size: 0.9rem;
+}
+
+.collaborator-badge {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #2C1810;
+    padding: 3px 10px;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
 .reservations-section {
     margin: .5rem 0;
     background: #F5D000;

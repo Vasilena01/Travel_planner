@@ -2,7 +2,6 @@
 {% load static %}
 {% block content %}
 <link rel="stylesheet" type="text/css" href="{% static 'user_trips/list_trips.css' %}" />
-
 <div class="trips-header">
     <h1 class="trips-title">My Trips</h1>
     <button
@@ -14,7 +13,6 @@
         <i class="fas fa-plus"></i> Create Trip
     </button>
 </div>
-
 <div class="trips-sections">
     <!-- Current and Future Trips Section -->
     <section class="trips-section">
@@ -30,7 +28,20 @@
             <p class="no-trips-message">No upcoming trips planned yet!</p>
         {% endif %}
     </section>
-
+    <!-- SharedTrips Section -->
+    <section class="trips-section">
+        <h2 class="section-title">
+            <i class="fas fa-user-friends"></i>
+            Shared Trips
+        </h2>
+        {% if shared_current_future %}
+            <div class="trips-container">
+                {% include "list_user_trips.html" with trips=shared_current_future %}
+            </div>
+        {% else %}
+            <p class="no-trips-message">No shared trips planned yet!</p>
+        {% endif %}
+    </section>
     <!-- Past Trips Section -->
     <section class="trips-section past-trips">
         <h2 class="section-title">
@@ -46,6 +57,5 @@
         {% endif %}
     </section>
 </div>
-
 {% include "create_trip_modal.html" %}
 {% endblock %}

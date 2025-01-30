@@ -19,9 +19,46 @@
         <span><i class="fas fa-user"></i> {{ trip.user.username }}</span>
       </div>
     </div>
+    <button class="add-collaborator-btn" data-bs-toggle="modal" data-bs-target="#addCollaboratorModal">
+      <i class="fas fa-user-plus"></i> Add Collaborator
+    </button>
+    <!-- Display current collaborators -->
+    {% if trip.collaborators.exists %}
+    <div class="collaborators-list">
+      <span class="collaborators-label">Collaborators:</span>
+      {% for collaborator in trip.collaborators.all %}
+        <span class="collaborator-badge">{{ collaborator.username }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
   </div>
 </div>
-
+<!-- Collaborator Modal -->
+<div class="modal fade" id="addCollaboratorModal" tabindex="-1" aria-labelledby="addCollaboratorModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addCollaboratorModalLabel">Add Collaborator</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form method="POST" action="{% url 'add_collaborator' trip.id %}">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="collaborator" class="form-label">Select User</label>
+            <select name="collaborator" id="collaborator" class="form-select" required>
+              <option value="">Choose a user...</option>
+              {% for user in available_users %}
+                <option value="{{ user.id }}">{{ user.username }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary">Add Collaborator</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 <!-- Reservations section -->
 <div class="trip-content">
   <div class="reservations-section">
@@ -144,17 +181,21 @@
               <span>{{ place.name }}</span>
               <span id="place-address">{{ place.address }}</span>
             </div>
+            {% if request.user == trip.user %}
             <a href="{% url 'delete_place_from_trip' trip.id 'attractions' place.name|urlencode %}" class="delete-btn"
               onclick="return confirm('Are you sure you want to remove this place?')">
               <i class="fas fa-trash"></i>
             </a>
+            {% endif %}
           </div>
           {% endfor %}
         </div>
+        {% if request.user == trip.user %}
         <a class="add-place-btn" href="{% url 'list_places' trip.id 'attractions' %}">
           <i class="fas fa-plus"></i>
           <span>Add place</span>
         </a>
+        {% endif %}
       </div>
       <!-- Restaurants list -->
       <div class="list-container" id="restaurants-list">
@@ -169,17 +210,21 @@
               <span>{{ place.name }}</span>
               <span id="place-address">{{ place.address }}</span>
             </div>
+            {% if request.user == trip.user %}
             <a href="{% url 'delete_place_from_trip' trip.id 'restaurants' place.name|urlencode %}" class="delete-btn"
               onclick="return confirm('Are you sure you want to remove this place?')">
               <i class="fas fa-trash"></i>
             </a>
+            {% endif %}
           </div>
           {% endfor %}
         </div>
+        {% if request.user == trip.user %}
         <a class="add-place-btn" href="{% url 'list_places' trip.id 'restaurants' %}">
           <i class="fas fa-plus"></i>
           <span>Add place</span>
         </a>
+        {% endif %}
       </div>
     </div>
   </div>
@@ -191,14 +236,16 @@
       <div class="day-container">
         <div class="day-header">
           <h3>{{ day.date|date:"l, F jS" }}</h3>
-          {% if not trip.attractions and not trip.restaurants %}
+          {% if not trip.attractions and not trip.restaurants and request.user == trip.user %}
           <a href="{% url 'list_places' trip.id 'attractions' %}" class="btn btn-primary">
             Add places to your trip first
           </a>
           {% else %}
+          {% if request.user == trip.user %}
           <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPlaceModal-{{ day.id }}">
             Add place to this day
           </button>
+          {% endif %}
           {% endif %}
         </div>
         <div class="day-places">
@@ -206,10 +253,12 @@
           <div class="place-card">
             <div class="place-header">
               <h4>{{ place.name }}</h4>
+              {% if request.user == trip.user %}
               <a href="{% url 'delete_place_from_day' trip.id day.id forloop.counter0 %}" class="delete-day-place"
                 onclick="return confirm('Are you sure you want to remove this place from the day?')">
                 <i class="fas fa-times"></i>
               </a>
+              {% endif %}
             </div>
             <p>{{ place.address }}</p>
             <span class="place-type">{{ place.type|title }}</span>
@@ -261,7 +310,6 @@
     </div>
   </div>
 </div>
-
 <script>
 function updatePlaceType(selectElement, dayId) {
     const selectedOption = selectElement.options[selectElement.selectedIndex];

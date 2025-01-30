@@ -10,12 +10,14 @@ from datetime import date, timedelta
 import math
 from django.core.paginator import Paginator
 from django.utils import timezone
+from django.contrib.auth.models import User
+from django.contrib import messages
+from django.db import models
 
 @login_required
 def list_trips(request):
     today = date.today()
     
-    # Get all user's trips and separate them into current/future and past trips
     current_future_trips = MyTrip.objects.filter(
         user=request.user,
         end_date__gte=today
@@ -26,9 +28,21 @@ def list_trips(request):
         end_date__lt=today
     ).order_by('-end_date')
     
+    shared_current_future = MyTrip.objects.filter(
+        shared_with=request.user,
+        end_date__gte=today
+    ).order_by('start_date')
+    
+    shared_past = MyTrip.objects.filter(
+        shared_with=request.user,
+        end_date__lt=today
+    ).order_by('-end_date')
+    
     context = {
         'current_future_trips': current_future_trips,
         'past_trips': past_trips,
+        'shared_current_future': shared_current_future,
+        'shared_past': shared_past,
     }
     
     return render(request, 'user_trips/list_trips.html', context)
@@ -36,17 +50,32 @@ def list_trips(request):
 
 @login_required
 def trip_detail(request, trip_id):
-    trip = get_object_or_404(MyTrip, id=trip_id, user=request.user)
+    # Check if user is either the owner or a collaborator of the trip
+    trip = get_object_or_404(
+        MyTrip, 
+        models.Q(id=trip_id) & (
+            models.Q(user=request.user) | 
+            models.Q(shared_with=request.user)
+        )
+    )
     
     trip.generate_trip_days()
     
     # Get all days for this trip
     trip_days = trip.days.all()
+
+    # Get all users except current user and existing collaborators
+    available_users = User.objects.exclude(
+        models.Q(id=request.user.id) | 
+        models.Q(id__in=trip.collaborators.all())
+    )
     
     context = {
         'trip': trip,
         'trip_days': trip_days,
+        'available_users': available_users,
     }
+    
     return render(request, 'user_trips/trip_detail.html', context)
 
 
@@ -329,3 +358,36 @@ def delete_place_from_day(request, trip_id, day_id, place_index):
         trip_day.save()
     
     return redirect('trip_detail', trip_id=trip_id)
+
+@login_required
+def add_collaborator(request, trip_id):
+    if request.method == 'POST':
+        trip = get_object_or_404(MyTrip, id=trip_id)
+        collaborator_id = request.POST.get('collaborator')
+        
+        if collaborator_id:
+            collaborator = get_object_or_404(User, id=collaborator_id)
+            if collaborator not in trip.collaborators.all():
+                # Add as collaborator
+                trip.collaborators.add(collaborator)
+                # Add trip to collaborator's trips list
+                trip.shared_with.add(collaborator)
+                messages.success(request, f'{collaborator.username} has been added as a collaborator.')
+            else:
+                messages.warning(request, 'This user is already a collaborator.')
+        
+        return redirect('trip_detail', trip_id=trip_id)
+
+@login_required
+def remove_from_shared(request, trip_id):
+    if request.method == 'POST':
+        trip = get_object_or_404(MyTrip, id=trip_id)
+        if request.user in trip.shared_with.all():
+            trip.shared_with.remove(request.user)
+            trip.collaborators.remove(request.user)
+            messages.success(request, 'You have been removed from the shared trip.')
+        else:
+            messages.error(request, 'You are not a collaborator of this trip.')
+    
+    next_url = request.GET.get('next', 'list_trips')
+    return redirect(next_url)

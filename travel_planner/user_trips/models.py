@@ -3,7 +3,9 @@ from django.contrib.auth.models import User
 from datetime import timedelta
 
 class MyTrip(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="trips")
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    shared_with = models.ManyToManyField(User, related_name='shared_trips', blank=True)
+    collaborators = models.ManyToManyField(User, related_name='collaborated_trips', blank=True)
     destination = models.CharField(max_length=255)
     start_date = models.DateField()
     end_date = models.DateField()

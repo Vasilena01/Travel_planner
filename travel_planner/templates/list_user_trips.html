@@ -2,7 +2,7 @@
 {% load static %}
 
 <title>User Trips</title>
-<link rel="stylesheet" type="text/css" href="{% static 'css/list_user_trips.css' %}" /><div id="trips-container">
+<link rel="stylesheet" type="text/css" href="{% static 'css/list_user_trips.css' %}" />
 
 <div id="trips-container">
   {% for trip in trips %}
@@ -14,27 +14,40 @@
         <p class="card-text">{{ trip.start_date }} - {{ trip.end_date }}</p>
       </div>
     </a>
-    <form method="post" action="{% url 'delete_trip' trip.id %}?next={{ request.path }}">
-      {% csrf_token %}
-      <button type="submit" class="delete-trip-btn">
+    {% if trip.user == request.user %}
+      <!-- Owner can delete the entire trip -->
+      <form method="post" action="{% url 'delete_trip' trip.id %}?next={{ request.path }}">
+        {% csrf_token %}
+        <button type="submit" class="delete-trip-btn" data-is-owner="true">
           <i class="fas fa-trash-alt"></i>
-      </button>
-    </form>
+        </button>
+      </form>
+    {% else %}
+      <!-- Collaborator can only remove themselves from the trip -->
+      <form method="post" action="{% url 'remove_from_shared' trip.id %}?next={{ request.path }}">
+        {% csrf_token %}
+        <button type="submit" class="delete-trip-btn" data-is-owner="false">
+          <i class="fas fa-user-minus"></i>
+        </button>
+      </form>
+    {% endif %}
   </div>
   {% endfor %}
 </div>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        console.log("Delete trip confirmation script loaded");
-        
         const deleteButtons = document.querySelectorAll('.delete-trip-btn');
         
         deleteButtons.forEach(button => {
             button.addEventListener("click", function (e) {
-                console.log("Delete button clicked");
-                if (!confirm("Are you sure you want to delete this trip?")) {
+                const isOwner = button.getAttribute('data-is-owner') === 'true';
+                const confirmMessage = isOwner 
+                    ? "Are you sure you want to delete this trip? This will remove it for all collaborators as well."
+                    : "Are you sure you want to remove yourself from this shared trip?";
+                
+                if (!confirm(confirmMessage)) {
                     e.preventDefault();
-                    console.log("Deletion canceled");
                 }
             });
         });

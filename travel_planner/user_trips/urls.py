@@ -11,4 +11,6 @@ urlpatterns = [
     path('trip/<int:trip_id>/delete-place/<str:place_type>/<str:place_name>/', views.delete_place_from_trip, name='delete_place_from_trip'),
     path('trip/<int:trip_id>/day/<int:day_id>/add-place/', views.add_place_to_day, name='add_place_to_day'),
     path('trip/<int:trip_id>/day/<int:day_id>/delete-place/<int:place_index>/', views.delete_place_from_day, name='delete_place_from_day'),
+    path('trip/<int:trip_id>/add-collaborator/', views.add_collaborator, name='add_collaborator'),
+    path('trip/<int:trip_id>/remove-from-shared/', views.remove_from_shared, name='remove_from_shared'),
 ]
