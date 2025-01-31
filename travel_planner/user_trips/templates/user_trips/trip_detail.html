@@ -19,6 +19,7 @@
         <span><i class="fas fa-user"></i> {{ trip.user.username }}</span>
       </div>
     </div>
+    {% if request.user == trip.user %}
     <button class="add-collaborator-btn" data-bs-toggle="modal" data-bs-target="#addCollaboratorModal">
       <i class="fas fa-user-plus"></i> Add Collaborator
     </button>
@@ -30,6 +31,7 @@
         <span class="collaborator-badge">{{ collaborator.username }}</span>
       {% endfor %}
     </div>
+    {% endif %}
     {% endif %}
   </div>
 </div>
