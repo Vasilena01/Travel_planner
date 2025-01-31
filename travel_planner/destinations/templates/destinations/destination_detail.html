@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" type="text/css" href="{% static 'destinations/destination_detail.css' %}" />
+<div class="destination-detail-container">
+    {% if error_message %}
+        <div class="error-container">
+            <h2>{{ error_message }}</h2>
+            <a href="{% url 'homepage' %}" class="btn btn-primary">
+                <i class="fas fa-arrow-left"></i> Back to Destinations
+            </a>
+        </div>
+    {% else %}
+        <div class="destination-header">
+            <div class="destination-title">
+                <h1>{{ destination.name }}</h1>
+                <img src="{{ destination.flag }}" alt="{{ destination.name }} flag" class="country-flag">
+            </div>
+            <div class="destination-meta">
+                <div class="meta-item">
+                    <i class="fas fa-city"></i>
+                    <span>Capital: {{ destination.capital }}</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-globe-americas"></i>
+                    <span>Region: {{ destination.region }}</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-users"></i>
+                    <span>Population: {{ destination.population }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="destination-info-grid">
+            <div class="info-card">
+                <h3><i class="fas fa-language"></i> Languages</h3>
+                <ul>
+                    {% for language in destination.languages %}
+                        <li>{{ language }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="info-card">
+                <h3><i class="fas fa-coins"></i> Currencies</h3>
+                <ul>
+                    {% for currency in destination.currencies %}
+                        <li>{{ currency }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% if destination.maps_url %}
+            <div class="info-card">
+                <h3><i class="fas fa-map-marked-alt"></i> Maps</h3>
+                <a href="{{ destination.maps_url }}" target="_blank" class="map-link">
+                    View on Google Maps
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        {% if destination.major_cities %}
+        <div class="major-cities">
+            <h2>Major Cities to Visit</h2>
+            <div class="cities-grid">
+                {% for city in destination.major_cities %}
+                <div class="city-card">
+                    {% if city.image_url %}
+                    <img src="{{ city.image_url }}" alt="{{ city.name }}">
+                    {% endif %}
+                    <h3>{{ city.name }}</h3>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        <div class="destination-photos">
+            <h2>Photos</h2>
+            <div class="photos-grid">
+                {% for photo in destination.photos %}
+                <div class="photo-card">
+                    <img src="{{ photo }}" alt="{{ destination.name }}" loading="lazy">
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

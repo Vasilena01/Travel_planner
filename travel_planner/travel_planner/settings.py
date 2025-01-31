@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'hotel_finder',
     'user_trips',
     'search_flights',
+    'destinations',
 ]
 
 MIDDLEWARE = [
@@ -149,3 +150,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 PEXELS_API_KEY = os.getenv('PEXELS_API_KEY')
 FOURSQUARE_API_KEY = os.getenv('FOURSQUARE_API_KEY')
 RAPID_API_KEY = os.getenv('RAPID_API_KEY')
+GEONAMES_USERNAME = 'vanesafmi'

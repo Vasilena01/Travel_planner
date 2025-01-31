@@ -1,9 +1,9 @@
-{% extends "base.html" %} {% load static %} {% block content %}
+{% extends 'base.html' %} 
+{% load static %} 
+{% block content %}
 <link rel="stylesheet" type="text/css" href="{% static 'main/styles.css' %}" />
-
 <h1>Welcome to PlanAway</h1>
 <p>Start crafting your unforgettable journeys, step by step!</p>
-
 {% if request.user.is_authenticated %}
 <div class="trips-container">
     <div class="header-container">
@@ -19,6 +19,54 @@
     </div>
     {% include "list_user_trips.html" with trips=current_future_trips %}
     {% include "create_trip_modal.html" %}
+</div>
+<div class="explore-container">
+    <div class="section-header">
+        <h2><i class="fas fa-globe-americas"></i> Explore Destinations</h2>
+        <p>Discover your next adventure</p>
+    </div>
+    <div class="categories-nav">
+        <a href="{% url 'homepage' %}?category=all" class="category-btn {% if selected_category == 'all' %}active{% endif %}">
+            <i class="fas fa-star"></i> Popular
+        </a>
+        <a href="{% url 'homepage' %}?category=europe" class="category-btn {% if selected_category == 'europe' %}active{% endif %}">
+            <i class="fas fa-landmark"></i> Europe
+        </a>
+        <a href="{% url 'homepage' %}?category=asia" class="category-btn {% if selected_category == 'asia' %}active{% endif %}">
+            <i class="fas fa-torii-gate"></i> Asia
+        </a>
+        <a href="{% url 'homepage' %}?category=americas" class="category-btn {% if selected_category == 'americas' %}active{% endif %}">
+            <i class="fas fa-mountain"></i> Americas
+        </a>
+        <a href="{% url 'homepage' %}?category=africa" class="category-btn {% if selected_category == 'africa' %}active{% endif %}">
+            <i class="fas fa-tree"></i> Africa
+        </a>
+        <a href="{% url 'homepage' %}?category=oceania" class="category-btn {% if selected_category == 'oceania' %}active{% endif %}">
+            <i class="fas fa-water"></i> Oceania
+        </a>
+    </div>
+    <div class="destinations-grid">
+        {% for destination in destinations %}
+        <div class="destination-card">
+            <div class="card-image">
+                <img src="{{ destination.image_url }}" alt="{{ destination.name }}" loading="lazy">
+            </div>
+            <div class="destination-info">
+                <div class="destination-header">
+                    <h3>{{ destination.name }}</h3>
+                    <img src="{{ destination.flag }}" alt="{{ destination.name }} flag" class="country-flag">
+                </div>
+                <p class="capital">{{ destination.capital }}</p>
+                <div class="destination-meta">
+                    <span><i class="fas fa-globe-americas"></i> {{ destination.region }}</span>
+                </div>
+                <a href="{% url 'destination_detail' destination.name|slugify %}" class="explore-btn">
+                    Explore <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 {% else %}
 <a class="homepage-btn" href="{% url 'register' %}">Register</a>
