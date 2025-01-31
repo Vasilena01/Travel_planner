@@ -18,31 +18,27 @@ from django.db import models
 def list_trips(request):
     today = date.today()
     
+    # Get both owned and shared current/future trips
     current_future_trips = MyTrip.objects.filter(
-        user=request.user,
+        models.Q(user=request.user) | models.Q(shared_with=request.user),
         end_date__gte=today
     ).order_by('start_date')
     
+    # Get both owned and shared past trips
     past_trips = MyTrip.objects.filter(
-        user=request.user,
+        models.Q(user=request.user) | models.Q(shared_with=request.user),
         end_date__lt=today
     ).order_by('-end_date')
-    
+
     shared_current_future = MyTrip.objects.filter(
         shared_with=request.user,
         end_date__gte=today
     ).order_by('start_date')
     
-    shared_past = MyTrip.objects.filter(
-        shared_with=request.user,
-        end_date__lt=today
-    ).order_by('-end_date')
-    
     context = {
         'current_future_trips': current_future_trips,
         'past_trips': past_trips,
         'shared_current_future': shared_current_future,
-        'shared_past': shared_past,
     }
     
     return render(request, 'user_trips/list_trips.html', context)
