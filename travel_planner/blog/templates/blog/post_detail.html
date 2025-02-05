@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" type="text/css" href="{% static 'blog/post_detail.css' %}" />
+<h1>{{ post.title }}</h1>
+<p>By {{ post.author }} on {{ post.date_posted|date:"F d, Y" }}</p>
+<p>{{ post.content }}</p>
+{% if post.image %}
+    <img src="{{ post.image.url }}" alt="{{ post.title }}">
+{% endif %}
+{% endblock %}

@@ -11,4 +11,5 @@ urlpatterns = [
     path('my-trips/', include('user_trips.urls')),
     path('search-flights/', include('search_flights.urls')),
     path('destinations/', include('destinations.urls')),
+    path('blog/', include('blog.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

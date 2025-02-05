@@ -85,10 +85,8 @@ def create_trip(request):
         if (start_date >= end_date):
             return redirect('list_trips')
 
-        # Pexels API configuration
         headers = {'Authorization': settings.PEXELS_API_KEY}
         
-        # Enhanced search query to focus on landmarks and tourist attractions
         search_query = f"{destination} landmarks architecture"
         api_url = f"https://api.pexels.com/v1/search?query={search_query}&per_page=1&orientation=landscape&size=large"
         
@@ -99,7 +97,6 @@ def create_trip(request):
             if data.get("photos") and len(data["photos"]) > 0:
                 image_url = data["photos"][0]["src"]["landscape"]
             else:
-                # Fallback search if no results with landmarks
                 fallback_search = f"{destination} cityscape skyline"
                 fallback_url = f"https://api.pexels.com/v1/search?query={fallback_search}&per_page=1&orientation=landscape&size=large"
                 fallback_response = requests.get(fallback_url, headers=headers)
@@ -138,12 +135,10 @@ def delete_trip(request, trip_id):
 def list_places(request, trip_id, place_type):
     trip = get_object_or_404(MyTrip, id=trip_id, user=request.user)
     
-    # Foursquare API configuration
     client_id = settings.FOURSQUARE_API_KEY
     destination = trip.destination.strip()
     
     try:
-        # Get coordinates using Nominatim
         geolocator = Nominatim(user_agent="my_travel_planner")
         location = geolocator.geocode(destination)
         
@@ -208,7 +203,7 @@ def list_places(request, trip_id, place_type):
                 'name': place.get('name', ''),
                 'address': address,
                 'rating': f"{rating}/10" if rating else 'No rating',
-                'raw_rating': rating or 0,  # Store raw rating for sorting
+                'raw_rating': rating or 0,
                 'vote_count': vote_count,
                 'photo_url': photo_url,
                 'description': place.get('description', 'No description available'),
@@ -217,7 +212,6 @@ def list_places(request, trip_id, place_type):
             }
             formatted_places.append(formatted_place)
         
-        # Sort places by rating * vote_count to prioritize highly-rated places with more votes
         def get_weighted_rating(place):
             try:
                 rating = place['raw_rating']
@@ -321,10 +315,8 @@ def add_place_to_day(request, trip_id, day_id):
         place_name = request.POST.get('place_name')
         place_type = request.POST.get('place_type')
         
-        # Get the correct list based on place_type
         place_list = trip.attractions if place_type == 'attractions' else trip.restaurants
         
-        # Find the place in the corresponding list
         place_details = next((place for place in place_list if place['name'] == place_name), None)
         
         if place_details:
@@ -364,9 +356,7 @@ def add_collaborator(request, trip_id):
         if collaborator_id:
             collaborator = get_object_or_404(User, id=collaborator_id)
             if collaborator not in trip.collaborators.all():
-                # Add as collaborator
                 trip.collaborators.add(collaborator)
-                # Add trip to collaborator's trips list
                 trip.shared_with.add(collaborator)
                 messages.success(request, f'{collaborator.username} has been added as a collaborator.')
             else:
