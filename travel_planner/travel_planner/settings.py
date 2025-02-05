@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'user_trips',
     'search_flights',
     'destinations',
+    'blog'
 ]
 
 MIDDLEWARE = [
@@ -146,8 +147,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# API Keys
+# Load env variables - API keys from .env file
 PEXELS_API_KEY = os.getenv('PEXELS_API_KEY')
 FOURSQUARE_API_KEY = os.getenv('FOURSQUARE_API_KEY')
 RAPID_API_KEY = os.getenv('RAPID_API_KEY')
-GEONAMES_USERNAME = 'vanesafmi'
+GEONAMES_USERNAME = os.getenv('GEONAMES_USERNAME')
