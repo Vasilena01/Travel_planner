@@ -1,9 +1,7 @@
 {% block content %}
 {% load static %}
-
 <title>User Trips</title>
 <link rel="stylesheet" type="text/css" href="{% static 'css/list_user_trips.css' %}" />
-
 <div id="trips-container">
   {% for trip in trips %}
   <div class="card" style="width: 18rem;">
@@ -34,7 +32,6 @@
   </div>
   {% endfor %}
 </div>
-
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const deleteButtons = document.querySelectorAll('.delete-trip-btn');
