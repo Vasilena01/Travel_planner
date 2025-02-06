@@ -30,7 +30,7 @@
     color: white;
 }
 
-.create-post-btn:hover {
+.create-post-btn:hover, .create-post-btn:active {
     background-color: #e5c000;
     color: white;
 }
