@@ -72,7 +72,6 @@
     document.addEventListener("DOMContentLoaded", function () {
       const createTripModal = document.getElementById("createTripModal");
   
-      // Reset form on modal close
       createTripModal.addEventListener("hidden.bs.modal", function () {
         const form = document.getElementById("createTripForm");
         form.reset();

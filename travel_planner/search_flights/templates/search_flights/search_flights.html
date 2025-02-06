@@ -10,162 +10,97 @@
     </div>
     {% endif %}
     <div class="search-form-container">
-        <form method="POST" class="search-form">
+        <form method="POST" action="{% url 'search_flights' %}">
             {% csrf_token %}
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="from_location">From:</label>
-                    <input type="text" 
-                           id="from_location" 
-                           name="from_location" 
-                           class="form-control" 
-                           required 
-                           value="{{ search_params.from_location|default:'' }}">
-                </div>
-                <div class="form-group">
-                    <label for="to_location">To:</label>
-                    <input type="text" 
-                           id="to_location" 
-                           name="to_location" 
-                           class="form-control" 
-                           required 
-                           value="{{ search_params.to_location|default:'' }}">
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="departure_date">Departure Date:</label>
-                    <input type="date" 
-                           id="departure_date" 
-                           name="departure_date" 
-                           class="form-control" 
-                           required 
-                           min="{{ current_date }}"
-                           value="{{ search_params.departure_date|default:'' }}">
-                </div>
-                <div class="form-group">
-                    <label for="return_date">Return Date:</label>
-                    <input type="date" 
-                           id="return_date" 
-                           name="return_date" 
-                           class="form-control" 
-                           min="{{ current_date }}"
-                           value="{{ search_params.return_date|default:'' }}">
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="adults">Adults:</label>
-                    <input type="number" 
-                           id="adults" 
-                           name="adults" 
-                           class="form-control" 
-                           min="1" 
-                           value="{{ search_params.adults|default:'1' }}">
-                </div>
-                <div class="form-group">
-                    <label for="children">Children:</label>
-                    <input type="number" 
-                           id="children" 
-                           name="children" 
-                           class="form-control" 
-                           min="0" 
-                           value="{{ search_params.children|default:'0' }}">
-                </div>
-                <div class="form-group">
-                    <label for="cabin_class">Cabin Class:</label>
-                    <select id="cabin_class" name="cabin_class" class="form-control">
-                        <option value="ECONOMY" {% if search_params.cabin_class == 'ECONOMY' %}selected{% endif %}>Economy</option>
-                        <option value="BUSINESS" {% if search_params.cabin_class == 'BUSINESS' %}selected{% endif %}>Business</option>
-                        <option value="FIRST" {% if search_params.cabin_class == 'FIRST' %}selected{% endif %}>First Class</option>
-                    </select>
-                </div>
-            </div>
-            <button type="submit" class="btn btn-primary search-btn">
-                <i class="fas fa-search"></i> Search Flights
-            </button>
+            {{ form.as_p }}
+    
+            <button type="submit">Search Flights</button>
         </form>
-    </div>
+    </div>    
     {% if flights %}
     <div class="flights-results">
         <h2>Available Flights</h2>
         <div class="flights-container">
-            {% for pair in flights %}
+            {% for flight in flights %}
                 <div class="round-trip-card">
                     <!-- Outbound Flight -->
+                    {% if flight.direction == 'outbound' %}
                     <div class="flight-card">
                         <div class="flight-tags">
-                            {% for tag in pair.outbound.tags %}
+                            {% for tag in flight.outbound.tags %}
                                 <span class="tag {{ tag.type }}">{{ tag.text }}</span>
                             {% endfor %}
                         </div>
                         <div class="flight-header">
                             <div class="airline">
-                                <img src="{{ pair.outbound.airline.logo }}" alt="{{ pair.outbound.airline.name }}" class="airline-logo">
-                                <span>{{ pair.outbound.airline.name }}</span>
+                                <img src="{{ flight.airline.logo }}" alt="{{ flight.airline.name }}" class="airline-logo">
+                                <span>{{ flight.airline.name }}</span>
                             </div>
                             <div class="flight-details">
                                 <div class="time-container">
-                                    <span class="time">{{ pair.outbound.departure.time|date:"H:i" }}</span>
-                                    <span class="airport">{{ pair.outbound.departure.airport.code }}</span>
-                                    <span class="date">{{ pair.outbound.departure.time|date:"d M" }}</span>
+                                    <span class="time">{{ flight.departure.time|date:"H:i" }}</span>
+                                    <span class="airport">{{ flight.departure.airport.code }}</span>
+                                    <span class="date">{{ flight.departure.time|date:"d M" }}</span>
                                 </div>
                                 <div class="flight-path">
                                     <div class="connection-line">
-                                        <span class="duration">{{ pair.outbound.duration }}</span>
+                                        <span class="duration">{{ flight.duration }}</span>
                                         <hr class="flight-line">
-                                        {% if pair.outbound.stops == 0 %}
+                                        {% if flight.stops == 0 %}
                                             <span class="stops-text">Direct</span>
                                         {% else %}
-                                            <span class="stops-text">{{ pair.outbound.stops }} stop{% if pair.outbound.stops > 1 %}s{% endif %}</span>
+                                            <span class="stops-text">{{ flight.stops }} stop{% if flight.stops > 1 %}s{% endif %}</span>
                                         {% endif %}
                                     </div>
                                 </div>
                                 <div class="time-container">
-                                    <span class="time">{{ pair.outbound.arrival.time|date:"H:i" }}</span>
-                                    <span class="airport">{{ pair.outbound.arrival.airport.code }}</span>
-                                    <span class="date">{{ pair.outbound.arrival.time|date:"d M" }}</span>
+                                    <span class="time">{{ flight.arrival.time|date:"H:i" }}</span>
+                                    <span class="airport">{{ flight.arrival.airport.code }}</span>
+                                    <span class="date">{{ flight.arrival.time|date:"d M" }}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    {% endif %}
                     <!-- Return Flight -->
+                    {% if flight.direction == 'return' %}
                     <div class="flight-card return-flight">
                         <div class="flight-tags">
-                            {% for tag in pair.return.tags %}
+                            {% for tag in flight.return.tags %}
                                 <span class="tag {{ tag.type }}">{{ tag.text }}</span>
                             {% endfor %}
                         </div>
                         <div class="flight-header">
                             <div class="airline">
-                                <img src="{{ pair.return.airline.logo }}" alt="{{ pair.return.airline.name }}" class="airline-logo">
-                                <span>{{ pair.return.airline.name }}</span>
+                                <img src="{{ flight.return.airline.logo }}" alt="{{ flight.return.airline.name }}" class="airline-logo">
+                                <span>{{ flight.return.airline.name }}</span>
                             </div>
                             <div class="flight-details">
                                 <div class="time-container">
-                                    <span class="time">{{ pair.return.departure.time|date:"H:i" }}</span>
-                                    <span class="airport">{{ pair.return.departure.airport.code }}</span>
-                                    <span class="date">{{ pair.return.departure.time|date:"d M" }}</span>
+                                    <span class="time">{{ flight.return.departure.time|date:"H:i" }}</span>
+                                    <span class="airport">{{ flight.return.departure.airport.code }}</span>
+                                    <span class="date">{{ flight.return.departure.time|date:"d M" }}</span>
                                 </div>
                                 <div class="flight-path">
                                     <div class="connection-line">
-                                        <span class="duration">{{ pair.return.duration }}</span>
+                                        <span class="duration">{{ flight.return.duration }}</span>
                                         <hr class="flight-line">
-                                        {% if pair.return.stops == 0 %}
+                                        {% if flight.return.stops == 0 %}
                                             <span class="stops-text">Direct</span>
                                         {% else %}
-                                            <span class="stops-text">{{ pair.return.stops }} stop{% if pair.return.stops > 1 %}s{% endif %}</span>
+                                            <span class="stops-text">{{ flight.return.stops }} stop{% if flight.return.stops > 1 %}s{% endif %}</span>
                                         {% endif %}
                                     </div>
                                 </div>
                                 <div class="time-container">
-                                    <span class="time">{{ pair.return.arrival.time|date:"H:i" }}</span>
-                                    <span class="airport">{{ pair.return.arrival.airport.code }}</span>
-                                    <span class="date">{{ pair.return.arrival.time|date:"d M" }}</span>
+                                    <span class="time">{{ flight.return.arrival.time|date:"H:i" }}</span>
+                                    <span class="airport">{{ flight.return.arrival.airport.code }}</span>
+                                    <span class="date">{{ flight.return.arrival.time|date:"d M" }}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    {% endif %}
 
                     <div class="flight-info">
                         <div class="luggage-info">
@@ -173,10 +108,10 @@
                             <span>Standard fare: personal item, cabin bag</span>
                         </div>
                         <div class="price-container">
-                            <span class="price">{{ pair.outbound.price.currency }} {{ pair.outbound.price.amount|floatformat:2 }}</span>
+                            <span class="price">{{ flight.price.currency }} {{ flight.price.amount|floatformat:2 }}</span>
                         </div>
                     </div>
-                    <a href="{{ pair.outbound.bookingLink }}" target="_blank" class="btn btn-primary book-btn">
+                    <a href="{{ flight.bookingLink }}" target="_blank" class="btn btn-primary book-btn">
                         Book Round Trip
                     </a>
                 </div>

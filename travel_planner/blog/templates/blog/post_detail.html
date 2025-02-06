@@ -2,20 +2,48 @@
 {% load static %}
 {% block content %}
 <link rel="stylesheet" type="text/css" href="{% static 'blog/post_detail.css' %}" />
-<div class="container my-3">
-    <div class="text-center mb-3">
+<div class="container my-4">
+    <div class="text-center mb-4">
         <h1 class="display-4 font-weight-bold post-title">{{ post.title }}</h1>
-        <p class="text-muted post-meta">By <span class="font-italic">{{ post.author }}</span> on 
-            <span class="font-weight-bold">{{ post.date_posted|date:"F d, Y" }}</span></p>
+        <p class="text-muted post-meta">
+            By <span class="font-italic">{{ post.author }}</span> on 
+            <span class="font-weight-bold">{{ post.date_posted|date:"F d, Y" }}</span>
+        </p>
     </div>
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <div class="mb-4">
-                <img src="{{ post.image.url }}" alt="{{ post.title }}" class="img-fluid post-image">
-            </div>
-            <div class="post-content">
-                <p class="lead post-text">{{ post.content }}</p>
-            </div>
+            {% if user == post.author %}
+                <form method="POST" action="{% url 'edit_post' post.id %}" enctype="multipart/form-data" class="edit-form">
+                    {% csrf_token %}
+                    <div class="editable-field">
+                        <label for="id_title" class="font-weight-bold">Title:</label>
+                        <input type="text" id="id_title" name="title" class="form-control title-input" value="{{ post.title }}">
+                    </div>
+                    <div class="mb-4 text-center">
+                        <div class="editable-field">
+                            <label for="id_image" class="font-weight-bold">Image:</label>
+                            <input type="file" id="id_image" name="image" class="form-control-file image-input">
+                        </div>
+                        <img src="{{ post.image.url }}" alt="{{ post.title }}" class="img-fluid post-image mt-2">
+                    </div>
+                    <div class="post-content">
+                        <div class="editable-field">
+                            <label for="id_content" class="font-weight-bold">Content:</label>
+                            <textarea id="id_content" name="content" class="form-control content-textarea" rows="5">{{ post.content }}</textarea>
+                        </div>
+                    </div>
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-warning btn-lg">Save Changes</button>
+                    </div>
+                </form>
+            {% else %}
+                <div class="text-center">
+                    <img src="{{ post.image.url }}" alt="{{ post.title }}" class="img-fluid post-image">
+                </div>
+                <div class="post-content">
+                    <p class="lead post-text">{{ post.content }}</p>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>

@@ -1,4 +1,6 @@
-{% extends "base.html" %} {% load static %} {% block content %}
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
 <title>Search Hotels</title>
 <link
   rel="stylesheet"
@@ -8,64 +10,19 @@
 <div class="search_hotels_container">
   <h1>Search Hotels</h1>
 
-  {% if messages %}
+  {% if error_message %}
   <ul>
-    {% for message in error_message %}
-    <li style="color: red">{{ message }}</li>
-    {% endfor %}
+    <li style="color: red">{{ error_message }}</li>
   </ul>
   {% endif %}
-  
-  <form method="post" action="{% url 'search_hotels' %}">
+
+  <form method="POST" action="{% url 'search_hotels' %}">
     {% csrf_token %}
-  
-    <label for="destination">Destination:</label>
-    <input
-      type="text"
-      id="destination"
-      name="destination"
-      placeholder="Enter destination"
-      required
-    />
-  
-    <label for="checkin">Check-In Date:</label>
-    <input
-      type="date"
-      id="checkin"
-      name="arrival_date"
-      min="{{ current_date }}"
-      required
-    />
-  
-    <label for="checkout">Check-Out Date:</label>
-    <input
-      type="date"
-      id="checkout"
-      name="departure_date"
-      min="{{ current_date }}"
-      required
-    />
-  
-    <label for="adults">Adults:</label>
-    <input type="number" id="adults" name="adults" min="1" value="1" required />
-  
-    <label for="children">Children Ages (comma-separated):</label>
-    <input
-      type="text"
-      id="children-age"
-      name="children_age"
-      placeholder="e.g., 0,5,10"
-    />
-  
-    <label for="rooms">Rooms:</label>
-    <input type="number" id="rooms" name="room_qty" min="1" value="1" required />
-  
-    <label for="page">Page Number:</label>
-    <input type="number" id="page-number" name="page_number" min="1" value="1" />
-  
+    {{ form.as_p }}
+
     <button type="submit">Find Hotels</button>
   </form>
-  
+
   {% if hotels %}
   <div id="hotel-results">
     <h2>Hotels</h2>
@@ -79,8 +36,8 @@
         />
         <h3>{{ hotel.property.name }}</h3>
         <p>
-          Price: {{hotel.property.priceBreakdown.grossPrice.value|floatformat:0}}
-          {{hotel.property.priceBreakdown.grossPrice.currency }}
+          Price: {{ hotel.property.priceBreakdown.grossPrice.value|floatformat:0 }}
+          {{ hotel.property.priceBreakdown.grossPrice.currency }}
         </p>
         <p>Review score: {{ hotel.property.reviewScore }} / 10</p>
         <a href="{{ hotel.bookingUrl }}" target="_blank" class="btn btn-primary book-btn">
@@ -89,8 +46,6 @@
       </div>
       {% endfor %}
     </div>
-
-    <!-- Pagination -->
     {% if hotels.paginator.num_pages > 1 %}
     <div class="pagination-container">
         <div class="pagination">
@@ -102,7 +57,6 @@
                     <i class="fas fa-angle-left"></i>
                 </button>
             {% endif %}
-
             {% for num in hotels.paginator.page_range %}
                 {% if num == hotels.number %}
                     <span class="page-link active">{{ num }}</span>
@@ -110,7 +64,6 @@
                     <button type="submit" name="page" value="{{ num }}" class="page-link">{{ num }}</button>
                 {% endif %}
             {% endfor %}
-
             {% if hotels.has_next %}
                 <button type="submit" name="page" value="{{ hotels.next_page_number }}" class="page-link">
                     <i class="fas fa-angle-right"></i>
@@ -126,34 +79,5 @@
   {% else %}
   <p id="no-hotels-msg">No hotels found. Please try again with different details.</p>
   {% endif %} 
-
-  <!-- Hidden form for pagination in order to keep the search params -->
-  <form id="pagination-form" method="POST" style="display: none;">
-    {% csrf_token %}
-    <input type="hidden" name="destination" value="{{ search_params.destination }}">
-    <input type="hidden" name="arrival_date" value="{{ search_params.arrival_date }}">
-    <input type="hidden" name="departure_date" value="{{ search_params.departure_date }}">
-    <input type="hidden" name="adults" value="{{ search_params.adults }}">
-    <input type="hidden" name="children_age" value="{{ search_params.children }}">
-    <input type="hidden" name="room_qty" value="{{ search_params.rooms }}">
-  </form>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.page-link').forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
-            const pageNum = this.value;
-            const form = document.getElementById('pagination-form');
-            const pageInput = document.createElement('input');
-            pageInput.type = 'hidden';
-            pageInput.name = 'page';
-            pageInput.value = pageNum;
-            form.appendChild(pageInput);
-            form.submit();
-        });
-    });
-});
-</script>
 {% endblock %}

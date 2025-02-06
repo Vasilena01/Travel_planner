@@ -7,18 +7,18 @@
     <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
         {% csrf_token %}
         <div class="input-group">
-            <input type="text" name="title" id="title" class="form-control" required>
+            {{ form.title }}
             <label for="title">Title</label>
-            <div class="invalid-feedback">Please enter a title.</div>
+            <div class="invalid-feedback">{{ form.title.errors }}</div>
         </div>
         <div class="input-group">
-            <textarea name="content" id="content" class="form-control" rows="5" required></textarea>
+            {{ form.content }}
             <label for="content">Content</label>
-            <div class="invalid-feedback">Please enter content.</div>
+            <div class="invalid-feedback">{{ form.content.errors }}</div>
         </div>
         <div class="input-group">
-            <input type="file" name="image" id="image" class="form-control" required>
-            <div class="invalid-feedback">Please upload an image.</div>
+            {{ form.image }}
+            <div class="invalid-feedback">{{ form.image.errors }}</div>
         </div>
         <button type="submit" class="btn create-post-btn">
             <i class="fas fa-plus"></i> Create Post

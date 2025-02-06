@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from datetime import date
 from .models import Post
+from .forms import PostForm
 
 @login_required
 def list_posts(request):
@@ -17,26 +18,19 @@ def post_detail(request, pk):
 @login_required
 def create_post(request):
     if request.method == "POST":
-        title = request.POST['title']
-        content = request.POST['content']
-        date_posted = date.today()
-        image = request.FILES['image']
-
-        try:
-            Post.objects.create(
-                author = request.user,
-                title = title,
-                content = content,
-                date_posted = date_posted,
-                image = image
-            )
-            messages.success(request, 'Account created successfully. Please login.')
+        form = PostForm(request.POST, request.FILES)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user
+            post.save()
+            messages.success(request, 'Post created successfully!')
             return redirect('list_posts')
-        except Exception as e:
+        else:
             messages.error(request, 'Error creating blog post. Please try again.')
-            return render(request, 'blog/create_post.html')
+    else:
+        form = PostForm()
 
-    return render(request, 'blog/create_post.html')
+    return render(request, 'blog/create_post.html', {'form': form})
 
 @login_required
 def delete_post(request, pk):
@@ -50,3 +44,21 @@ def delete_post(request, pk):
     messages.success(request, "Post deleted successfully.")
     return redirect('list_posts')
 
+@login_required
+def edit_post(request, pk):
+    post = get_object_or_404(Post, id=pk)
+
+    if post.author != request.user:
+        messages.error(request, "You do not have permission to edit this post.")
+        return redirect('post_detail', pk=post.id)
+
+    if request.method == 'POST':
+        form = PostForm(request.POST, request.FILES, instance=post)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Post updated successfully!")
+            return redirect('list_posts')
+    else:
+        form = PostForm(instance=post)
+
+    return render(request, 'blog/post_detail.html', {'post': post, 'form': form})

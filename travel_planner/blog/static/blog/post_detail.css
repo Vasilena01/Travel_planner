@@ -1,26 +1,80 @@
+.container {
+    max-width: 800px;
+}
+
 .post-title {
     color: #F5007A;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
 }
 
 .post-meta {
     font-size: 1rem;
     color: #6c757d !important;
+    text-align: center;
 }
 
 .post-image {
     border-radius: 10px;
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 10px auto;
 }
 
 .post-content {
     background: white;
-    padding: 1rem;
+    padding: 1.5rem;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
 }
 
 .post-text {
     font-size: 1.1rem;
     line-height: 1.8;
     color: #555;
+}
+
+.editable-field {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.title-input,
+.image-input,
+.content-textarea {
+    width: 100%;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+}
+
+.content-textarea {
+    resize: vertical;
+}
+
+.edit-icon {
+    color: #ffd700;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.edit-icon:hover {
+    color: #d8ba0d;
+}
+
+.btn-warning {
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    border-radius: 8px;
+    color: white;
+}
+
+.btn-warning:hover {
+    color: white;
 }

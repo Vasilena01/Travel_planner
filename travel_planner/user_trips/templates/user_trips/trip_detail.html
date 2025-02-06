@@ -318,7 +318,6 @@ function updatePlaceType(selectElement, dayId) {
     const placeType = selectedOption.closest('optgroup').label.toLowerCase();
     document.getElementById(`place_type_${dayId}`).value = placeType;
 }
-
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('select[name="place_name"]').forEach(select => {
         const dayId = select.id.replace('place_select_', '');
