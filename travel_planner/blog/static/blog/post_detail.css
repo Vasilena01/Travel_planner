@@ -1,0 +1,26 @@
+.post-title {
+    color: #F5007A;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.post-meta {
+    font-size: 1rem;
+    color: #6c757d !important;
+}
+
+.post-image {
+    border-radius: 10px;
+}
+
+.post-content {
+    background: white;
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.post-text {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #555;
+}
