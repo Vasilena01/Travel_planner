@@ -23,15 +23,14 @@
     <button class="add-collaborator-btn" data-bs-toggle="modal" data-bs-target="#addCollaboratorModal">
       <i class="fas fa-user-plus"></i> Add Collaborator
     </button>
-    <!-- Display current collaborators -->
-    {% if trip.collaborators.exists %}
-    <div class="collaborators-list">
-      <span class="collaborators-label">Collaborators:</span>
-      {% for collaborator in trip.collaborators.all %}
-        <span class="collaborator-badge">{{ collaborator.username }}</span>
-      {% endfor %}
-    </div>
-    {% endif %}
+      {% if trip.collaborators.exists %}
+      <div class="collaborators-list">
+        <span class="collaborators-label">Collaborators:</span>
+        {% for collaborator in trip.collaborators.all %}
+          <span class="collaborator-badge">{{ collaborator.username }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
     {% endif %}
   </div>
 </div>

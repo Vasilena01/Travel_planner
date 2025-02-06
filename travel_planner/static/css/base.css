@@ -20,7 +20,7 @@ html {
     border-color: #dcbf17;
 }
 
-.btn-primary:hover {
+.btn-primary:hover, .btn-primary:focus {
     background-color: #d3b404;
     border-color: #dcbf17;
 }
@@ -60,6 +60,12 @@ nav
     border: none;
     box-shadow: none;
     text-transform: none;
+}
+
+input:focus, textarea:focus, .form-select:focus, .form-control:focus, .btn-close:focus {
+    border-color: #d3b404 !important;
+    outline: none !important;
+    box-shadow: 0 0 0 0.2rem rgba(211, 180, 4, 0.25);
 }
 
 footer {

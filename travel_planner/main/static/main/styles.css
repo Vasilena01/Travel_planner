@@ -79,7 +79,6 @@ p {
     cursor: pointer;
 }
 
-/* Explore Container Styles */
 .explore-container {
     padding: 3rem 1rem;
     background-color: #f8f9fa;
@@ -97,6 +96,10 @@ p {
 
 .section-header p {
     color: #6c757d;
+}
+
+.categories-nav a {
+    text-decoration: none;
 }
 
 .categories-nav {
