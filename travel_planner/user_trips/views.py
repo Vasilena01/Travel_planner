@@ -56,11 +56,8 @@ def trip_detail(request, trip_id):
     )
     
     trip.generate_trip_days()
-    
-    # Get all days for this trip
     trip_days = trip.days.all()
 
-    # Get all users except current user and existing collaborators
     available_users = User.objects.exclude(
         models.Q(id=request.user.id) | 
         models.Q(id__in=trip.collaborators.all())
@@ -73,7 +70,6 @@ def trip_detail(request, trip_id):
     }
     
     return render(request, 'user_trips/trip_detail.html', context)
-
 
 @login_required
 def create_trip(request):
@@ -150,7 +146,6 @@ def list_places(request, trip_id, place_type):
         
         url = "https://api.foursquare.com/v3/places/search"
         
-        # Define category IDs based on place_type
         if place_type == 'attractions':
             categories = "16000,10000,10027,10028,10025"  # landmarks, arts, museums
         else:

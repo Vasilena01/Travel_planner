@@ -2,7 +2,6 @@ from django.shortcuts import render
 import requests
 from django.conf import settings
 from django.http import JsonResponse
-from .models import Destination
 
 def get_destinations_by_category(category):
     countries_url = "https://restcountries.com/v3.1"
@@ -21,7 +20,7 @@ def get_destinations_by_category(category):
     countries = response.json()
     
     destinations = []
-    for country in countries[:12]:
+    for country in countries[:15]:
         try:
             headers = {'Authorization': settings.PEXELS_API_KEY}
             pexels_response = requests.get(
@@ -64,7 +63,6 @@ def category_destinations(request, category):
     return JsonResponse({'destinations': destinations}, safe=False)
 
 def get_major_cities(country_name, country_code):
-    """Get major cities using GeoNames API"""
     try:
         # Get cities with population > 100000, ordered by population
         response = requests.get(
@@ -90,7 +88,6 @@ def get_major_cities(country_name, country_code):
 
 def destination_detail(request, destination_name):
     try:
-        # Get country details from REST Countries API
         response = requests.get(f"https://restcountries.com/v3.1/name/{destination_name}")
         
         if response.status_code != 200 or not response.json():

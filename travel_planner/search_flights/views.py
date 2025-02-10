@@ -51,7 +51,6 @@ def search_flights(request):
         form = FlightSearchForm(request.POST)
         if form.is_valid():
             try:
-                # Getting validated form data
                 from_location = form.cleaned_data['from_location']
                 to_location = form.cleaned_data['to_location']
                 departure_date = form.cleaned_data['departure_date']
@@ -60,7 +59,6 @@ def search_flights(request):
                 children = form.cleaned_data['children']
                 cabin_class = form.cleaned_data['cabin_class']
                 
-                # Convert dates to string format for the API request
                 departure_date_str = departure_date.strftime('%Y-%m-%d')
                 return_date_str = return_date.strftime('%Y-%m-%d') if return_date else None
 
@@ -69,7 +67,6 @@ def search_flights(request):
                     'x-rapidapi-host': "booking-com15.p.rapidapi.com"
                 }
 
-                # Get destination IDs
                 from_id = get_destination_id(from_location, headers)
                 to_id = get_destination_id(to_location, headers)
 
@@ -144,7 +141,6 @@ def search_flights(request):
                         }
                         outbound_flights.append(outbound_flight)
 
-                        # Process return flights similarly
                         if return_date_str and len(offer['segments']) > 1:
                             return_flight = {
                                 'airline': {
@@ -223,7 +219,6 @@ def search_flights(request):
                             if flight_duration == min_duration_return:
                                 flight['tags'].append({'type': 'fastest', 'text': 'Fastest'})
 
-                    # Pair the flights
                     paired_flights = list(zip(outbound_flights, return_flights))
                     flights = [{'outbound': out, 'return': ret} for out, ret in paired_flights]
 

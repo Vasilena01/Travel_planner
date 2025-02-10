@@ -2,27 +2,19 @@
 {% load static %}
 {% block content %}
 <title>Search Hotels</title>
-<link
-  rel="stylesheet"
-  type="text/css"
-  href="{% static 'hotel_finder/styles.css' %}"
-/>
+<link rel="stylesheet" type="text/css" href="{% static 'hotel_finder/styles.css' %}"/>
 <div class="search_hotels_container">
   <h1>Search Hotels</h1>
-
   {% if error_message %}
   <ul>
     <li style="color: red">{{ error_message }}</li>
   </ul>
   {% endif %}
-
   <form method="POST" action="{% url 'search_hotels' %}">
     {% csrf_token %}
     {{ form.as_p }}
-
     <button type="submit">Find Hotels</button>
   </form>
-
   {% if hotels %}
   <div id="hotel-results">
     <h2>Hotels</h2>

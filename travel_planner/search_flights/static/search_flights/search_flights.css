@@ -28,6 +28,18 @@ form input, form button {
     box-sizing: border-box;
 }
 
+form select {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin: 5px 0 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+    background-color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
 form button {
     background-color: #ffd700;
     color: white;
