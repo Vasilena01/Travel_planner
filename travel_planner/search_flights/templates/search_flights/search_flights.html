@@ -13,7 +13,6 @@
         <form method="POST" action="{% url 'search_flights' %}">
             {% csrf_token %}
             {{ form.as_p }}
-    
             <button type="submit">Search Flights</button>
         </form>
     </div>    
@@ -24,7 +23,6 @@
             {% for flight in flights %}
                 <div class="round-trip-card">
                     <!-- Outbound Flight -->
-                    {% if flight.direction == 'outbound' %}
                     <div class="flight-card">
                         <div class="flight-tags">
                             {% for tag in flight.outbound.tags %}
@@ -33,37 +31,36 @@
                         </div>
                         <div class="flight-header">
                             <div class="airline">
-                                <img src="{{ flight.airline.logo }}" alt="{{ flight.airline.name }}" class="airline-logo">
-                                <span>{{ flight.airline.name }}</span>
+                                <img src="{{ flight.outbound.airline.logo }}" alt="{{ flight.outbound.airline.name }}" class="airline-logo">
+                                <span>{{ flight.outbound.airline.name }}</span>
                             </div>
                             <div class="flight-details">
                                 <div class="time-container">
-                                    <span class="time">{{ flight.departure.time|date:"H:i" }}</span>
-                                    <span class="airport">{{ flight.departure.airport.code }}</span>
-                                    <span class="date">{{ flight.departure.time|date:"d M" }}</span>
+                                    <span class="time">{{ flight.outbound.departure.time|date:"H:i" }}</span>
+                                    <span class="airport">{{ flight.outbound.departure.airport.code }}</span>
+                                    <span class="date">{{ flight.outbound.departure.time|date:"d M" }}</span>
                                 </div>
                                 <div class="flight-path">
                                     <div class="connection-line">
-                                        <span class="duration">{{ flight.duration }}</span>
+                                        <span class="duration">{{ flight.outbound.duration }}</span>
                                         <hr class="flight-line">
-                                        {% if flight.stops == 0 %}
+                                        {% if flight.outbound.stops == 0 %}
                                             <span class="stops-text">Direct</span>
                                         {% else %}
-                                            <span class="stops-text">{{ flight.stops }} stop{% if flight.stops > 1 %}s{% endif %}</span>
+                                            <span class="stops-text">{{ flight.outbound.stops }} stop
+                                                {% if flight.outbound.stops > 1 %}s{% endif %}</span>
                                         {% endif %}
                                     </div>
                                 </div>
                                 <div class="time-container">
-                                    <span class="time">{{ flight.arrival.time|date:"H:i" }}</span>
-                                    <span class="airport">{{ flight.arrival.airport.code }}</span>
-                                    <span class="date">{{ flight.arrival.time|date:"d M" }}</span>
+                                    <span class="time">{{ flight.outbound.arrival.time|date:"H:i" }}</span>
+                                    <span class="airport">{{ flight.outbound.arrival.airport.code }}</span>
+                                    <span class="date">{{ flight.outbound.arrival.time|date:"d M" }}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    {% endif %}
                     <!-- Return Flight -->
-                    {% if flight.direction == 'return' %}
                     <div class="flight-card return-flight">
                         <div class="flight-tags">
                             {% for tag in flight.return.tags %}
@@ -88,7 +85,8 @@
                                         {% if flight.return.stops == 0 %}
                                             <span class="stops-text">Direct</span>
                                         {% else %}
-                                            <span class="stops-text">{{ flight.return.stops }} stop{% if flight.return.stops > 1 %}s{% endif %}</span>
+                                            <span class="stops-text">{{ flight.return.stops }} stop
+                                                {% if flight.return.stops > 1 %}s{% endif %}</span>
                                         {% endif %}
                                     </div>
                                 </div>
@@ -100,15 +98,16 @@
                             </div>
                         </div>
                     </div>
-                    {% endif %}
-
                     <div class="flight-info">
                         <div class="luggage-info">
                             <i class="fas fa-suitcase"></i>
                             <span>Standard fare: personal item, cabin bag</span>
                         </div>
                         <div class="price-container">
-                            <span class="price">{{ flight.price.currency }} {{ flight.price.amount|floatformat:2 }}</span>
+                            <span class="price">
+                                {{ flight.return.price.currency }} 
+                                {{ flight.outbound.price.amount|add:flight.return.price.amount|floatformat:2 }}
+                            </span>
                         </div>
                     </div>
                     <a href="{{ flight.bookingLink }}" target="_blank" class="btn btn-primary book-btn">

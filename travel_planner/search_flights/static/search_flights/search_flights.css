@@ -245,19 +245,14 @@ form button:hover {
     border-radius: 4px;
 }
 
-.tag.best {
+.tag.best-deal {
     background-color: #F5D000;
     color: #2C1810;
 }
 
-.tag.direct {
+.tag.fastest {
     background-color: #F5D000;
     color: #2C1810;
-}
-
-.tag.flexible {
-    color: #D4418E;
-    background-color: rgba(212, 65, 142, 0.1);
 }
 
 .flight-info {

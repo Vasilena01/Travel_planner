@@ -99,8 +99,10 @@ def search_flights(request):
 
                 if data.get('status') and data.get('data', {}).get('flightOffers'):
                     flights = []
+                    outbound_flights = []
+                    return_flights = []
+
                     for offer in data['data']['flightOffers']:
-                        # Process the flight offer as shown in the existing view
                         outbound_flight = {
                             'airline': {
                                 'name': offer['segments'][0]['legs'][0]['carriersData'][0]['name'],
@@ -140,7 +142,7 @@ def search_flights(request):
                             ),
                             'direction': 'outbound'
                         }
-                        flights.append(outbound_flight)
+                        outbound_flights.append(outbound_flight)
 
                         # Process return flights similarly
                         if return_date_str and len(offer['segments']) > 1:
@@ -183,30 +185,47 @@ def search_flights(request):
                                 ),
                                 'direction': 'return'
                             }
-                            flights.append(return_flight)
+                            return_flights.append(return_flight)
 
-                if flights:
-                    flight_pairs = []
-                    outbound_flights = []
-                    return_flights = []
-                    
-                    for flight in flights:
-                        if flight['direction'] == 'outbound':
-                            outbound_flights.append(flight)
-                        else:
-                            return_flights.append(flight)
-                    
-                    # Sort flights by price
-                    outbound_flights.sort(key=lambda x: x['price']['amount'])
-                    return_flights.sort(key=lambda x: x['price']['amount'])
+                    # Find the cheapest and fastest outbound flights
+                    if outbound_flights:
+                        min_price_outbound = min(f['price']['amount'] for f in outbound_flights)
+                        min_duration_outbound = min(
+                            int(f['duration'].split('h')[0]) * 60 + int(f['duration'].split('h')[1].split('m')[0]) 
+                            for f in outbound_flights
+                        )
 
-                    flights = outbound_flights + return_flights
+                        for flight in outbound_flights:
+                            flight['tags'] = []
 
-                    context = {
-                        'flights': flights,
-                        'form': form,
-                        'error_message': error_message
-                    }
+                            if flight['price']['amount'] == min_price_outbound:
+                                flight['tags'].append({'type': 'best-deal', 'text': 'Best Deal'})
+
+                            flight_duration = int(flight['duration'].split('h')[0]) * 60 + int(flight['duration'].split('h')[1].split('m')[0])
+                            if flight_duration == min_duration_outbound:
+                                flight['tags'].append({'type': 'fastest', 'text': 'Fastest'})
+
+                    # Find the cheapest and fastest return flights
+                    if return_flights:
+                        min_price_return = min(f['price']['amount'] for f in return_flights)
+                        min_duration_return = min(
+                            int(f['duration'].split('h')[0]) * 60 + int(f['duration'].split('h')[1].split('m')[0]) 
+                            for f in return_flights
+                        )
+
+                        for flight in return_flights:
+                            flight['tags'] = []
+
+                            if flight['price']['amount'] == min_price_return:
+                                flight['tags'].append({'type': 'best-deal', 'text': 'Best Deal'})
+
+                            flight_duration = int(flight['duration'].split('h')[0]) * 60 + int(flight['duration'].split('h')[1].split('m')[0])
+                            if flight_duration == min_duration_return:
+                                flight['tags'].append({'type': 'fastest', 'text': 'Fastest'})
+
+                    # Pair the flights
+                    paired_flights = list(zip(outbound_flights, return_flights))
+                    flights = [{'outbound': out, 'return': ret} for out, ret in paired_flights]
 
                 else:
                     error_message = "Form is invalid. Please check the inputs."
