@@ -68,6 +68,10 @@ input:focus, textarea:focus, .form-select:focus, .form-control:focus, .btn-close
     box-shadow: 0 0 0 0.2rem rgba(211, 180, 4, 0.25);
 }
 
+.text-pink {
+    color: #ff69b4;
+}
+
 footer {
     text-align: center;
     padding: 20px;

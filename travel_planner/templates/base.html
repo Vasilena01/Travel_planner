@@ -53,6 +53,14 @@
         </li>
         {% endif %}
       </ul>
+      {% if request.user.is_authenticated %}
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item d-flex align-items-center">
+            <i class="fas fa-user-circle text-pink fs-4 me-2"></i>
+            <span class="navbar-text fw-bold">{{ request.user.username }}</span>
+        </li>
+      </ul>
+      {% endif %}
     </div>
   </nav>
   <div class="content" id="mainContent">
