@@ -91,13 +91,10 @@ def search_hotels(request):
                             hotels = paginator.get_page(page_number)
                         else:
                             error_message = "No hotels found for the given search. Please try again."
-
                 except requests.exceptions.RequestException as e:
                     error_message = f"An error occurred: {e}"
-
         else:
             error_message = "There was an error with your form submission."
-
     else:
         form = HotelSearchForm()
 

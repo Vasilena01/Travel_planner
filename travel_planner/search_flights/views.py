@@ -43,6 +43,7 @@ def get_destination_id(query, headers):
 
 @login_required
 def search_flights(request):
+    current_date = datetime.now().date()
     flights = None
     error_message = None
     current_date = datetime.now().strftime('%Y-%m-%d')
@@ -50,102 +51,63 @@ def search_flights(request):
     if request.method == 'POST':
         form = FlightSearchForm(request.POST)
         if form.is_valid():
-            try:
-                from_location = form.cleaned_data['from_location']
-                to_location = form.cleaned_data['to_location']
-                departure_date = form.cleaned_data['departure_date']
-                return_date = form.cleaned_data.get('return_date')
-                adults = form.cleaned_data['adults']
-                children = form.cleaned_data['children']
-                cabin_class = form.cleaned_data['cabin_class']
-                
-                departure_date_str = departure_date.strftime('%Y-%m-%d')
-                return_date_str = return_date.strftime('%Y-%m-%d') if return_date else None
+            departure_date_str = form.cleaned_data['departure_date'].strftime('%Y-%m-%d')
+            return_date_str = form.cleaned_data.get('return_date').strftime('%Y-%m-%d') if form.cleaned_data.get('return_date') else None
+            
+            if departure_date_str < current_date or return_date_str < current_date:
+                error_message = "Dates cannot be in the past."
+            else:
+                try:
+                    from_location = form.cleaned_data['from_location']
+                    to_location = form.cleaned_data['to_location']
+                    departure_date = form.cleaned_data['departure_date']
+                    return_date = form.cleaned_data.get('return_date')
+                    adults = form.cleaned_data['adults']
+                    children = form.cleaned_data['children']
+                    cabin_class = form.cleaned_data['cabin_class']
 
-                headers = {
-                    'x-rapidapi-key': settings.RAPID_API_KEY,
-                    'x-rapidapi-host': "booking-com15.p.rapidapi.com"
-                }
+                    headers = {
+                        'x-rapidapi-key': settings.RAPID_API_KEY,
+                        'x-rapidapi-host': "booking-com15.p.rapidapi.com"
+                    }
 
-                from_id = get_destination_id(from_location, headers)
-                to_id = get_destination_id(to_location, headers)
+                    from_id = get_destination_id(from_location, headers)
+                    to_id = get_destination_id(to_location, headers)
 
-                if not from_id or not to_id:
-                    error_message = "Could not find valid airport codes."
-                    raise ValueError(error_message)
+                    if not from_id or not to_id:
+                        error_message = "Could not find valid airport codes."
+                        raise ValueError(error_message)
 
-                conn = http.client.HTTPSConnection("booking-com15.p.rapidapi.com", timeout=30)
+                    conn = http.client.HTTPSConnection("booking-com15.p.rapidapi.com", timeout=30)
 
-                search_params = {
-                    'fromId': from_id,
-                    'toId': to_id,
-                    'departDate': departure_date_str,
-                    'returnDate': return_date_str,
-                    'adults': adults,
-                    'children': children,
-                    'cabinClass': cabin_class,
-                    'sort': 'BEST'
-                }
+                    search_params = {
+                        'fromId': from_id,
+                        'toId': to_id,
+                        'departDate': departure_date_str,
+                        'returnDate': return_date_str,
+                        'adults': adults,
+                        'children': children,
+                        'cabinClass': cabin_class,
+                        'sort': 'BEST'
+                    }
 
-                query_string = '&'.join(f"{k}={v}" for k, v in search_params.items() if v)
-                search_url = f"/api/v1/flights/searchFlights?{query_string}"
-                conn.request("GET", search_url, headers=headers)
-                res = conn.getresponse()
-                data = json.loads(res.read().decode("utf-8"))
-                conn.close()
+                    query_string = '&'.join(f"{k}={v}" for k, v in search_params.items() if v)
+                    search_url = f"/api/v1/flights/searchFlights?{query_string}"
+                    conn.request("GET", search_url, headers=headers)
+                    res = conn.getresponse()
+                    data = json.loads(res.read().decode("utf-8"))
+                    conn.close()
 
-                if data.get('status') and data.get('data', {}).get('flightOffers'):
-                    flights = []
-                    outbound_flights = []
-                    return_flights = []
+                    if data.get('status') and data.get('data', {}).get('flightOffers'):
+                        flights = []
+                        outbound_flights = []
+                        return_flights = []
 
-                    for offer in data['data']['flightOffers']:
-                        outbound_flight = {
-                            'airline': {
-                                'name': offer['segments'][0]['legs'][0]['carriersData'][0]['name'],
-                                'logo': offer['segments'][0]['legs'][0]['carriersData'][0]['logo']
-                            },
-                            'price': {
-                                'amount': offer['priceBreakdown']['total']['units'] + 
-                                          offer['priceBreakdown']['total']['nanos'] / 1000000000,
-                                'currency': offer['priceBreakdown']['total']['currencyCode']
-                            },
-                            'departure': {
-                                'airport': {
-                                    'code': offer['segments'][0]['departureAirport']['code'],
-                                    'name': offer['segments'][0]['departureAirport']['name']
-                                },
-                                'time': datetime.strptime(offer['segments'][0]['departureTime'], "%Y-%m-%dT%H:%M:%S")
-                            },
-                            'arrival': {
-                                'airport': {
-                                    'code': offer['segments'][0]['arrivalAirport']['code'],
-                                    'name': offer['segments'][0]['arrivalAirport']['name']
-                                },
-                                'time': datetime.strptime(offer['segments'][0]['arrivalTime'], "%Y-%m-%dT%H:%M:%S")
-                            },
-                            'duration': f"{offer['segments'][0]['totalTime'] // 3600}h {(offer['segments'][0]['totalTime'] % 3600) // 60}m",
-                            'stops': len(offer['segments'][0]['legs']) - 1,
-                            'cabinClass': offer['segments'][0]['legs'][0]['cabinClass'].title(),
-                            'bookingLink': (
-                                f"https://www.booking.com/flights/details.html"
-                                f"?aid=304142"
-                                f"&label=gen173nr-1FCAEoggI46AdIM1gEaGyIAQGYAQm4ARfIAQzYAQHoAQH4AQKIAgGoAgO4AqWs7a0GwAIB"
-                                f"&sid=null"
-                                f"&token={offer['token']}"
-                                f"&fromId={from_id}"
-                                f"&toId={to_id}"
-                                f"&source=search_form"
-                            ),
-                            'direction': 'outbound'
-                        }
-                        outbound_flights.append(outbound_flight)
-
-                        if return_date_str and len(offer['segments']) > 1:
-                            return_flight = {
+                        for offer in data['data']['flightOffers']:
+                            outbound_flight = {
                                 'airline': {
-                                    'name': offer['segments'][1]['legs'][0]['carriersData'][0]['name'],
-                                    'logo': offer['segments'][1]['legs'][0]['carriersData'][0]['logo']
+                                    'name': offer['segments'][0]['legs'][0]['carriersData'][0]['name'],
+                                    'logo': offer['segments'][0]['legs'][0]['carriersData'][0]['logo']
                                 },
                                 'price': {
                                     'amount': offer['priceBreakdown']['total']['units'] + 
@@ -154,21 +116,21 @@ def search_flights(request):
                                 },
                                 'departure': {
                                     'airport': {
-                                        'code': offer['segments'][1]['departureAirport']['code'],
-                                        'name': offer['segments'][1]['departureAirport']['name']
+                                        'code': offer['segments'][0]['departureAirport']['code'],
+                                        'name': offer['segments'][0]['departureAirport']['name']
                                     },
-                                    'time': datetime.strptime(offer['segments'][1]['departureTime'], "%Y-%m-%dT%H:%M:%S")
+                                    'time': datetime.strptime(offer['segments'][0]['departureTime'], "%Y-%m-%dT%H:%M:%S")
                                 },
                                 'arrival': {
                                     'airport': {
-                                        'code': offer['segments'][1]['arrivalAirport']['code'],
-                                        'name': offer['segments'][1]['arrivalAirport']['name']
+                                        'code': offer['segments'][0]['arrivalAirport']['code'],
+                                        'name': offer['segments'][0]['arrivalAirport']['name']
                                     },
-                                    'time': datetime.strptime(offer['segments'][1]['arrivalTime'], "%Y-%m-%dT%H:%M:%S")
+                                    'time': datetime.strptime(offer['segments'][0]['arrivalTime'], "%Y-%m-%dT%H:%M:%S")
                                 },
-                                'duration': f"{offer['segments'][1]['totalTime'] // 3600}h {(offer['segments'][1]['totalTime'] % 3600) // 60}m",
-                                'stops': len(offer['segments'][1]['legs']) - 1,
-                                'cabinClass': offer['segments'][1]['legs'][0]['cabinClass'].title(),
+                                'duration': f"{offer['segments'][0]['totalTime'] // 3600}h {(offer['segments'][0]['totalTime'] % 3600) // 60}m",
+                                'stops': len(offer['segments'][0]['legs']) - 1,
+                                'cabinClass': offer['segments'][0]['legs'][0]['cabinClass'].title(),
                                 'bookingLink': (
                                     f"https://www.booking.com/flights/details.html"
                                     f"?aid=304142"
@@ -179,54 +141,94 @@ def search_flights(request):
                                     f"&toId={to_id}"
                                     f"&source=search_form"
                                 ),
-                                'direction': 'return'
+                                'direction': 'outbound'
                             }
-                            return_flights.append(return_flight)
+                            outbound_flights.append(outbound_flight)
 
-                    # Find the cheapest and fastest outbound flights
-                    if outbound_flights:
-                        min_price_outbound = min(f['price']['amount'] for f in outbound_flights)
-                        min_duration_outbound = min(
-                            int(f['duration'].split('h')[0]) * 60 + int(f['duration'].split('h')[1].split('m')[0]) 
-                            for f in outbound_flights
-                        )
+                            if return_date_str and len(offer['segments']) > 1:
+                                return_flight = {
+                                    'airline': {
+                                        'name': offer['segments'][1]['legs'][0]['carriersData'][0]['name'],
+                                        'logo': offer['segments'][1]['legs'][0]['carriersData'][0]['logo']
+                                    },
+                                    'price': {
+                                        'amount': offer['priceBreakdown']['total']['units'] + 
+                                                  offer['priceBreakdown']['total']['nanos'] / 1000000000,
+                                        'currency': offer['priceBreakdown']['total']['currencyCode']
+                                    },
+                                    'departure': {
+                                        'airport': {
+                                            'code': offer['segments'][1]['departureAirport']['code'],
+                                            'name': offer['segments'][1]['departureAirport']['name']
+                                        },
+                                        'time': datetime.strptime(offer['segments'][1]['departureTime'], "%Y-%m-%dT%H:%M:%S")
+                                    },
+                                    'arrival': {
+                                        'airport': {
+                                            'code': offer['segments'][1]['arrivalAirport']['code'],
+                                            'name': offer['segments'][1]['arrivalAirport']['name']
+                                        },
+                                        'time': datetime.strptime(offer['segments'][1]['arrivalTime'], "%Y-%m-%dT%H:%M:%S")
+                                    },
+                                    'duration': f"{offer['segments'][1]['totalTime'] // 3600}h {(offer['segments'][1]['totalTime'] % 3600) // 60}m",
+                                    'stops': len(offer['segments'][1]['legs']) - 1,
+                                    'cabinClass': offer['segments'][1]['legs'][0]['cabinClass'].title(),
+                                    'bookingLink': (
+                                        f"https://www.booking.com/flights/details.html"
+                                        f"?aid=304142"
+                                        f"&label=gen173nr-1FCAEoggI46AdIM1gEaGyIAQGYAQm4ARfIAQzYAQHoAQH4AQKIAgGoAgO4AqWs7a0GwAIB"
+                                        f"&sid=null"
+                                        f"&token={offer['token']}"
+                                        f"&fromId={from_id}"
+                                        f"&toId={to_id}"
+                                        f"&source=search_form"
+                                    ),
+                                    'direction': 'return'
+                                }
+                                return_flights.append(return_flight)
 
-                        for flight in outbound_flights:
-                            flight['tags'] = []
+                        # Find the cheapest and fastest outbound flights
+                        if outbound_flights:
+                            min_price_outbound = min(f['price']['amount'] for f in outbound_flights)
+                            min_duration_outbound = min(
+                                int(f['duration'].split('h')[0]) * 60 + int(f['duration'].split('h')[1].split('m')[0]) 
+                                for f in outbound_flights
+                            )
 
-                            if flight['price']['amount'] == min_price_outbound:
-                                flight['tags'].append({'type': 'best-deal', 'text': 'Best Deal'})
+                            for flight in outbound_flights:
+                                flight['tags'] = []
 
-                            flight_duration = int(flight['duration'].split('h')[0]) * 60 + int(flight['duration'].split('h')[1].split('m')[0])
-                            if flight_duration == min_duration_outbound:
-                                flight['tags'].append({'type': 'fastest', 'text': 'Fastest'})
+                                if flight['price']['amount'] == min_price_outbound:
+                                    flight['tags'].append({'type': 'best-deal', 'text': 'Best Deal'})
 
-                    # Find the cheapest and fastest return flights
-                    if return_flights:
-                        min_price_return = min(f['price']['amount'] for f in return_flights)
-                        min_duration_return = min(
-                            int(f['duration'].split('h')[0]) * 60 + int(f['duration'].split('h')[1].split('m')[0]) 
-                            for f in return_flights
-                        )
+                                flight_duration = int(flight['duration'].split('h')[0]) * 60 + int(flight['duration'].split('h')[1].split('m')[0])
+                                if flight_duration == min_duration_outbound:
+                                    flight['tags'].append({'type': 'fastest', 'text': 'Fastest'})
 
-                        for flight in return_flights:
-                            flight['tags'] = []
+                        # Find the cheapest and fastest return flights
+                        if return_flights:
+                            min_price_return = min(f['price']['amount'] for f in return_flights)
+                            min_duration_return = min(
+                                int(f['duration'].split('h')[0]) * 60 + int(f['duration'].split('h')[1].split('m')[0]) 
+                                for f in return_flights
+                            )
 
-                            if flight['price']['amount'] == min_price_return:
-                                flight['tags'].append({'type': 'best-deal', 'text': 'Best Deal'})
+                            for flight in return_flights:
+                                flight['tags'] = []
 
-                            flight_duration = int(flight['duration'].split('h')[0]) * 60 + int(flight['duration'].split('h')[1].split('m')[0])
-                            if flight_duration == min_duration_return:
-                                flight['tags'].append({'type': 'fastest', 'text': 'Fastest'})
+                                if flight['price']['amount'] == min_price_return:
+                                    flight['tags'].append({'type': 'best-deal', 'text': 'Best Deal'})
 
-                    paired_flights = list(zip(outbound_flights, return_flights))
-                    flights = [{'outbound': out, 'return': ret} for out, ret in paired_flights]
+                                flight_duration = int(flight['duration'].split('h')[0]) * 60 + int(flight['duration'].split('h')[1].split('m')[0])
+                                if flight_duration == min_duration_return:
+                                    flight['tags'].append({'type': 'fastest', 'text': 'Fastest'})
 
-                else:
-                    error_message = "Form is invalid. Please check the inputs."
-
-            except Exception as e:
-                error_message = f"An error occurred: {str(e)}"
+                        paired_flights = list(zip(outbound_flights, return_flights))
+                        flights = [{'outbound': out, 'return': ret} for out, ret in paired_flights]
+                    else:
+                        error_message = "Form is invalid. Please check the inputs."
+                except Exception as e:
+                    error_message = f"An error occurred: {str(e)}"
     else:
         form = FlightSearchForm()
 
