@@ -1,26 +1,56 @@
-from django.shortcuts import render
+import json
+import os
 import requests
+from django.shortcuts import render
 from django.conf import settings
 from django.http import JsonResponse
 
+COUNTRIES_JSON_PATH = os.path.join(settings.BASE_DIR, 'countries_data.json')
+
+def fetch_and_store_countries():
+    try:
+        countries_url = "https://restcountries.com/v3.1/all"
+        response = requests.get(countries_url)
+        response.raise_for_status()
+        countries = response.json()
+
+        with open(COUNTRIES_JSON_PATH, 'w') as f:
+            json.dump(countries, f, indent=4)
+
+        print("Successfully fetched and stored country data.")
+        return countries
+    except Exception as e:
+        print(f"Error fetching countries: {str(e)}")
+        return []
+
+def load_countries_data():
+    if os.path.exists(COUNTRIES_JSON_PATH):
+        try:
+            with open(COUNTRIES_JSON_PATH, 'r') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"Error loading countries data: {str(e)}")
+            return []
+    else:
+        return fetch_and_store_countries()
+
 def get_destinations_by_category(category):
-    countries_url = "https://restcountries.com/v3.1"
+    countries = load_countries_data()
     
-    category_endpoints = {
-        'all': '/all',
-        'europe': '/region/europe',
-        'asia': '/region/asia',
-        'americas': '/region/americas',
-        'africa': '/region/africa',
-        'oceania': '/region/oceania'
+    category_filters = {
+        'all': lambda c: True,
+        'europe': lambda c: c.get('region') == 'Europe',
+        'asia': lambda c: c.get('region') == 'Asia',
+        'americas': lambda c: c.get('region') == 'Americas',
+        'africa': lambda c: c.get('region') == 'Africa',
+        'oceania': lambda c: c.get('region') == 'Oceania'
     }
     
-    endpoint = category_endpoints.get(category, '/all')
-    response = requests.get(f"{countries_url}{endpoint}")
-    countries = response.json()
-    
+    filter_func = category_filters.get(category, lambda c: True)
+    filtered_countries = [c for c in countries if filter_func(c)][:15]
+
     destinations = []
-    for country in countries[:15]:
+    for country in filtered_countries:
         try:
             headers = {'Authorization': settings.PEXELS_API_KEY}
             pexels_response = requests.get(
@@ -64,7 +94,6 @@ def category_destinations(request, category):
 
 def get_major_cities(country_name, country_code):
     try:
-        # Get cities with population > 100000, ordered by population
         response = requests.get(
             'http://api.geonames.org/searchJSON',
             params={
@@ -87,15 +116,17 @@ def get_major_cities(country_name, country_code):
         return []
 
 def destination_detail(request, destination_name):
+    countries = load_countries_data()
     try:
-        response = requests.get(f"https://restcountries.com/v3.1/name/{destination_name}")
+        country_data = next(
+            (c for c in countries if c['name']['common'].lower() == destination_name.lower()),
+            None
+        )
         
-        if response.status_code != 200 or not response.json():
+        if not country_data:
             return render(request, 'destinations/destination_detail.html', {
                 'error_message': f"Sorry, we couldn't find additional information about {destination_name}."
             })
-            
-        country_data = response.json()[0]
         
         headers = {'Authorization': settings.PEXELS_API_KEY}
         photos_response = requests.get(

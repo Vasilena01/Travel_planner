@@ -11,7 +11,7 @@ def list_posts(request):
     return render(request, 'blog/main_blog_page.html', {'posts': posts})
 
 @login_required
-def post_detail(request, pk):
+def get_post_detail(request, pk):
     post = get_object_or_404(Post, pk=pk)
     return render(request, 'blog/post_detail.html', {'post': post})
 

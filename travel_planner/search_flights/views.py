@@ -10,7 +10,7 @@ from datetime import datetime
 def get_destination_id(query, headers):
     """Helper function to get destination ID from the API"""
     if not query:
-        print("Empty query received")
+        print("No destination name received")
         return None
         
     try:
