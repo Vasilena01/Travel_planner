@@ -10,24 +10,13 @@
     {% if messages %}
         <ul>
             {% for message in messages %}
-                <li style="color: red;">{{ message }}</li>
+            <li style="color: red;">{{ message }}</li>
             {% endfor %}
         </ul>
     {% endif %}
     <form method="POST">
         {% csrf_token %}
-        <label for="username">Username:</label>
-        <input type="text" name="username" id="username" required><br>
-
-        <label for="email">Email:</label>
-        <input type="email" name="email" id="email" required><br>
-
-        <label for="password">Password:</label>
-        <input type="password" name="password" id="password" required><br>
-
-        <label for="confirm_password">Confirm Password:</label>
-        <input type="password" name="confirm_password" id="confirm_password" required><br>
-
+        {{ form.as_p }}
         <button type="submit">Register</button>
     </form>
     <p>Already have an account? <a href="{% url 'login' %}">Login here</a></p>

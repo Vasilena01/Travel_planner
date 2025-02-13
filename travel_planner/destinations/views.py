@@ -16,11 +16,8 @@ def fetch_and_store_countries():
 
         with open(COUNTRIES_JSON_PATH, 'w') as f:
             json.dump(countries, f, indent=4)
-
-        print("Successfully fetched and stored country data.")
         return countries
     except Exception as e:
-        print(f"Error fetching countries: {str(e)}")
         return []
 
 def load_countries_data():
@@ -29,7 +26,6 @@ def load_countries_data():
             with open(COUNTRIES_JSON_PATH, 'r') as f:
                 return json.load(f)
         except Exception as e:
-            print(f"Error loading countries data: {str(e)}")
             return []
     else:
         return fetch_and_store_countries()
@@ -38,16 +34,16 @@ def get_destinations_by_category(category):
     countries = load_countries_data()
     
     category_filters = {
-        'all': lambda c: True,
-        'europe': lambda c: c.get('region') == 'Europe',
-        'asia': lambda c: c.get('region') == 'Asia',
-        'americas': lambda c: c.get('region') == 'Americas',
-        'africa': lambda c: c.get('region') == 'Africa',
-        'oceania': lambda c: c.get('region') == 'Oceania'
+        'all': lambda country: True,
+        'europe': lambda country: country.get('region') == 'Europe',
+        'asia': lambda country: country.get('region') == 'Asia',
+        'americas': lambda country: country.get('region') == 'Americas',
+        'africa': lambda ccountry: country.get('region') == 'Africa',
+        'oceania': lambda country: country.get('region') == 'Oceania'
     }
     
-    filter_func = category_filters.get(category, lambda c: True)
-    filtered_countries = [c for c in countries if filter_func(c)][:15]
+    filter_func = category_filters.get(category, lambda country: True)
+    filtered_countries = [country for country in countries if filter_func(country)][:27]
 
     destinations = []
     for country in filtered_countries:
@@ -84,7 +80,6 @@ def get_destinations_by_category(category):
                 'flag': country['flags']['png']
             })
         except Exception as e:
-            print(f"Error processing {country['name']['common']}: {str(e)}")
             continue
     return destinations
 
@@ -112,7 +107,6 @@ def get_major_cities(country_name, country_code):
             return [city['name'] for city in data.get('geonames', [])]
         return []
     except Exception as e:
-        print(f"Error fetching cities: {str(e)}")
         return []
 
 def destination_detail(request, destination_name):
@@ -163,7 +157,6 @@ def destination_detail(request, destination_name):
                     'image_url': city_photo
                 })
             except Exception as e:
-                print(f"Error getting photo for {city}: {str(e)}")
                 continue
         
         context = {
@@ -184,7 +177,6 @@ def destination_detail(request, destination_name):
         
         return render(request, 'destinations/destination_detail.html', context)
     except Exception as e:
-        print(f"Error fetching details for {destination_name}: {str(e)}")
         return render(request, 'destinations/destination_detail.html', {
             'error_message': f"Sorry, we couldn't find additional information about {destination_name}."
         })
