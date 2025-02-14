@@ -38,35 +38,25 @@
       </div>
       {% endfor %}
     </div>
-    {% if hotels.paginator.num_pages > 1 %}
-    <div class="pagination-container">
-        <div class="pagination">
-            {% if hotels.has_previous %}
-                <button type="submit" name="page" value="1" class="page-link first-page" title="First page">
-                    <i class="fas fa-angle-double-left"></i>
-                </button>
-                <button type="submit" name="page" value="{{ hotels.previous_page_number }}" class="page-link">
-                    <i class="fas fa-angle-left"></i>
-                </button>
-            {% endif %}
-            {% for num in hotels.paginator.page_range %}
-                {% if num == hotels.number %}
-                    <span class="page-link active">{{ num }}</span>
-                {% else %}
-                    <button type="submit" name="page" value="{{ num }}" class="page-link">{{ num }}</button>
-                {% endif %}
-            {% endfor %}
-            {% if hotels.has_next %}
-                <button type="submit" name="page" value="{{ hotels.next_page_number }}" class="page-link">
-                    <i class="fas fa-angle-right"></i>
-                </button>
-                <button type="submit" name="page" value="{{ hotels.paginator.num_pages }}" class="page-link last-page" title="Last page">
-                    <i class="fas fa-angle-double-right"></i>
-                </button>
-            {% endif %}
-        </div>
-    </div>
-    {% endif %}
+    <form method="get">
+      <div class="pagination">
+          {% for num in hotels.paginator.page_range %}
+              {% if num == hotels.number %}
+                  <span class="page-link active">{{ num }}</span>
+              {% else %}
+                  <button type="submit" name="page" value="{{ num }}" class="page-link">{{ num }}</button>
+              {% endif %}
+          {% endfor %}
+          {% if hotels.has_next %}
+              <button type="submit" name="page" value="{{ hotels.next_page_number }}" class="page-link">
+                  <i class="fas fa-angle-right"></i>
+              </button>
+              <button type="submit" name="page" value="{{ hotels.paginator.num_pages }}" class="page-link last-page" title="Last page">
+                  <i class="fas fa-angle-double-right"></i>
+              </button>
+          {% endif %}
+      </div>
+    </form>  
   </div>
   {% else %}
   <p id="no-hotels-msg">No hotels found. Please try again with different details.</p>
