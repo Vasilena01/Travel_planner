@@ -25,21 +25,6 @@ class SearchHotelsViewTests(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'hotel_finder/search_destination.html')
-    
-    # @patch('hotel_finder.views.requests.get')
-    # def test_search_hotels_view_post_valid_data(self, mock_get):
-    #     mock_response = mock_get.return_value
-    #     mock_response.json.return_value = {
-    #         'data': [{'dest_id': 1, 'hotel_name': 'Hotel 1'}]
-    #     }      
-    #     user = User.objects.create_user(username='testuser', password='password')
-    #     self.client.login(username='testuser', password='password')
-    #     response = self.client.post(self.url, data=self.data)
-        
-    #     self.assertEqual(response.status_code, 302)
-    #     response = self.client.get(response.url)
-    #     self.assertTemplateUsed(response, 'hotel_finder/search_destination.html')
-    #     self.assertContains(response, 'No hotels found for the given search.')
 
     @patch('hotel_finder.views.requests.get')
     def test_search_hotels_view_post_invalid_date(self, mock_get):

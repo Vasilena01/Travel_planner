@@ -63,8 +63,8 @@ class SearchFlightsViewTests(TestCase):
         data = {
             'from_location': 'New York',
             'to_location': 'Los Angeles',
-            'departure_date': (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d'),  # Past date
-            'return_date': (datetime.now() - timedelta(days=14)).strftime('%Y-%m-%d'),  # Past date
+            'departure_date': (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d'),
+            'return_date': (datetime.now() - timedelta(days=14)).strftime('%Y-%m-%d'),
             'adults': 2,
             'children': 1,
             'cabin_class': 'economy'

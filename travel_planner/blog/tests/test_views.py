@@ -9,7 +9,7 @@ class BlogViewsTest(TestCase):
         self.client = Client()
         self.user = User.objects.create_user(username="testuser", password="password123")
         
-        # Creating a dummy image file
+        # Dummy image file
         self.image = SimpleUploadedFile("test_image.jpg", b"file_content", content_type="image/jpeg")
 
         self.post = Post.objects.create(

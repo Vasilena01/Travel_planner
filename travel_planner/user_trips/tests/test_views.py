@@ -15,7 +15,6 @@ class UserTripsViewsTests(TestCase):
         self.user = User.objects.create_user(username='testuser', password='testpassword')
         self.other_user = User.objects.create_user(username='otheruser', password='otherpassword')
 
-        # Create a trip for the test user
         self.trip = MyTrip.objects.create(
             user=self.user,
             destination='Test Destination',
@@ -24,7 +23,6 @@ class UserTripsViewsTests(TestCase):
             image_url='http://example.com/image.jpg'
         )
 
-        # Create a trip day for the trip
         self.trip_day = TripDay.objects.create(
             trip=self.trip,
             date=date.today()
@@ -128,28 +126,3 @@ class UserTripsViewsTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.trip_day.refresh_from_db()
         self.assertFalse(any(place['name'] == place_name for place in self.trip_day.places))
-
-    # def test_add_collaborator(self):
-    #     request = self.factory.post(reverse('add_collaborator', args=[self.trip.id]), {
-    #         'collaborator': self.other_user.id
-    #     })
-    #     request.user = self.user
-    #     response = add_collaborator(request, self.trip.id)
-
-    #     self.assertEqual(response.status_code, 302)
-    #     self.trip.refresh_from_db()
-    #     self.assertTrue(self.other_user in self.trip.collaborators.all())
-
-    # def test_remove_from_shared(self):
-    #     self.trip.shared_with.add(self.other_user)
-    #     self.trip.collaborators.add(self.other_user)
-    #     self.trip.save()
-
-    #     request = self.factory.post(reverse('remove_from_shared', args=[self.trip.id]))
-    #     request.user = self.other_user
-    #     response = remove_from_shared(request, self.trip.id)
-
-    #     self.assertEqual(response.status_code, 302)
-    #     self.trip.refresh_from_db()
-    #     self.assertFalse(self.other_user in self.trip.shared_with.all())
-    #     self.assertFalse(self.other_user in self.trip.collaborators.all())

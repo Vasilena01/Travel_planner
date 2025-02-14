@@ -56,12 +56,3 @@ class HomepageViewTests(TestCase):
         self.assertIn(self.future_trip, trips)
         self.assertIn(self.shared_trip, trips)
         self.assertNotIn(self.past_trip, trips)
-
-    # @patch('main.views.get_destinations_by_category')    
-    # def test_selected_category_is_passed(self, mock_get_destinations):
-    #     """Test selected category is correctly passed to get_destinations_by_category."""
-    #     category = 'beaches'
-    #     mock_get_destinations.return_value = ["Beach1", "Beach2"]
-    #     response = self.client.get(f'/?category={category}')
-    #     mock_get_destinations.assert_called_once_with(category)
-    #     self.assertEqual(response.context['selected_category'], category)
