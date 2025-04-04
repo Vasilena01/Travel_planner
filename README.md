@@ -33,14 +33,11 @@ Development Milestones
   - User profile storage system
 
 Technology Stack
-
-Backend: Django
-
-APIs:
+- Backend: Django
+- APIs:
   - Booking.com (hotels/flights)
   - RestCountries (destinations)
   - Foursquare (attractions/restaurants)
   - Pexels (photography)
-  - GeoPy (geolocation)
-    
-Frontend: HTML5, CSS3, JavaScript
+  - GeoPy (geolocation)  
+- Frontend: HTML5, CSS3, JavaScript
